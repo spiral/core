@@ -117,6 +117,7 @@ class InjectableConfigTest extends TestCase
     }
 
     use AliasTrait;
+
     protected $config = [
         'aliases' => [
             'default' => 'value',

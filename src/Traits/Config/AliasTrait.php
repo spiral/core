@@ -18,7 +18,7 @@ trait AliasTrait
      *
      * @return string
      */
-    public function resolveAlias($alias)
+    public function resolveAlias(string $alias): string
     {
         while (is_string($alias) && isset($this->config) && isset($this->config['aliases'][$alias])) {
             $alias = $this->config['aliases'][$alias];
