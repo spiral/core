@@ -131,6 +131,5 @@ class InjectableConfigTest extends TestCase
 
         $this->assertEquals('test', $config->resolveAlias('default'));
         $this->assertEquals('test', $config->resolveAlias('value'));
-        $this->assertEquals('test', $config->resolveAlias('default'));
     }
 }
