@@ -14,6 +14,16 @@ use Spiral\Core\Traits\Config\AliasTrait;
 
 class InjectableConfigTest extends TestCase
 {
+    use AliasTrait;
+
+    protected $config = [
+        'aliases' => [
+            'default' => 'value',
+            'value'   => 'another',
+            'another' => 'test'
+        ]
+    ];
+
     public function testArrayAccess()
     {
         $config = new InjectableConfig([
@@ -115,16 +125,6 @@ class InjectableConfigTest extends TestCase
             ]
         ]));
     }
-
-    use AliasTrait;
-
-    protected $config = [
-        'aliases' => [
-            'default' => 'value',
-            'value'   => 'another',
-            'another' => 'test'
-        ]
-    ];
 
     /**
      * @covers \Spiral\Core\InjectableConfig::__set_state()
