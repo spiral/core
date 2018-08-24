@@ -13,7 +13,7 @@ use Psr\Container\ContainerInterface;
 /**
  * Scope class provides ability to enable or disable global container access within specific access scope.
  */
-final class Scope
+final class ContainerScope
 {
     /**
      * @var ContainerInterface
