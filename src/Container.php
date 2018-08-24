@@ -8,6 +8,7 @@
 
 namespace Spiral\Core;
 
+use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use ReflectionFunctionAbstract as ContextFunction;
 use Spiral\Core\Container\Autowire;
@@ -114,6 +115,7 @@ class Container implements ContainerInterface, FactoryInterface, ResolverInterfa
      *
      * @param string|null $context Call context.
      * @throws ContainerException
+     * @throws \Error
      */
     public function get($alias, string $context = null)
     {
@@ -133,6 +135,7 @@ class Container implements ContainerInterface, FactoryInterface, ResolverInterfa
      * {@inheritdoc}
      *
      * @param string|null $context Related to parameter caused injection if any.
+     * @throws \Error
      */
     final public function make(string $alias, $parameters = [], string $context = null)
     {
