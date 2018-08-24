@@ -599,14 +599,12 @@ class Container implements ContainerInterface, FactoryInterface, ResolverInterfa
         $value
     ) {
         if (is_null($value)) {
-            if ($parameter->isOptional()) {
-                return;
-            }
-
-            if (!($parameter->isDefaultValueAvailable() && $parameter->getDefaultValue() === null)) {
+            if (
+                !$parameter->isOptional()
+                && !($parameter->isDefaultValueAvailable() && $parameter->getDefaultValue() === null)
+            ) {
                 throw new ArgumentException($parameter, $context);
             }
-
             return;
         }
 
