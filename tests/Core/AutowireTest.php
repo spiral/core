@@ -370,7 +370,11 @@ class AutowireTest extends TestCase
             'name' => 'Fixed'
         ]);
 
-        $b = unserialize(serialize($a));
+
+        $b = Container\Autowire::__set_state([
+            'alias'      => SoftDependedClass::class,
+            'parameters' => ['name' => 'Fixed']
+        ]);
         $this->assertEquals($a, $b);
     }
 }
