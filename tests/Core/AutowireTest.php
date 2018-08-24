@@ -349,6 +349,20 @@ class AutowireTest extends TestCase
         $this->assertSame('Fixed', $abc->getName());
     }
 
+    public function testGetAutowire()
+    {
+        $container = new Container();
+
+        /**
+         * @var SoftDependedClass $abc
+         */
+        $abc = $container->get(new Container\Autowire(SoftDependedClass::class, [
+            'name' => 'Fixed'
+        ]));
+
+        $this->assertSame('Fixed', $abc->getName());
+    }
+
     public function testBingToAutowireWithParameters()
     {
         $container = new Container();
