@@ -7,9 +7,9 @@
 
 namespace Spiral\Core\Tests;
 
-use Interop\Container\ContainerInterface;
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
+use Psr\Container\ContainerInterface;
 use Spiral\Core\Container;
 use Spiral\Core\Tests\Fixtures\SampleClass;
 
