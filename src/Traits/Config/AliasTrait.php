@@ -9,7 +9,7 @@
 namespace Spiral\Core\Traits\Config;
 
 /**
- * Provides aliasing ability for config classes.
+ * Provides aliasing ability for config entities.
  */
 trait AliasTrait
 {
