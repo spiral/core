@@ -14,6 +14,7 @@ use Spiral\Core\Exceptions\Container\ArgumentException;
 use Spiral\Core\Exceptions\Container\AutowireException;
 use Spiral\Core\Exceptions\Container\ContainerException;
 use Spiral\Core\Exceptions\DependencyException;
+use Spiral\Core\Exceptions\LogicException;
 
 class ExceptionsTest extends TestCase
 {
@@ -26,6 +27,15 @@ class ExceptionsTest extends TestCase
         $container = new Container();
         $container->bind('invalid', ['invalid']);
         $container->get('invalid');
+    }
+
+    /**
+     * @expectedException LogicException
+     */
+    public function testClone()
+    {
+        $container = new Container();
+        clone $container;
     }
 
     /**
