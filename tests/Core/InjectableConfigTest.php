@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Tests\Core;
+namespace Spiral\Core\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Spiral\Core\InjectableConfig;

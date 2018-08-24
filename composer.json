@@ -20,5 +20,10 @@
     "psr-4": {
       "Spiral\\Core\\": "src/"
     }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Spiral\\Core\\Tests\\": "tests/Core/"
+    }
   }
 }
