@@ -126,9 +126,6 @@ class InjectableConfigTest extends TestCase
         ]));
     }
 
-    /**
-     * @covers \Spiral\Core\InjectableConfig::__set_state()
-     */
     public function testAliases()
     {
         $this->assertEquals('test', $this->resolveAlias('default'));
