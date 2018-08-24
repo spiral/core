@@ -27,5 +27,5 @@ interface ScopeInterface
      * @return mixed
      * @throws \Throwable
      */
-    public function run(array $bindings, callable $scope);
+    public function runScope(array $bindings, callable $scope);
 }

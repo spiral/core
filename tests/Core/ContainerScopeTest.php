@@ -24,7 +24,7 @@ class ContainerScopeTest extends TestCase
 
         $this->assertNull(ContainerScope::getContainer());
 
-        $this->assertTrue(ContainerScope::runGlobal($container, function () use ($container) {
+        $this->assertTrue(ContainerScope::globalScope($container, function () use ($container) {
             return $container === ContainerScope::getContainer();
         }));
 
@@ -37,7 +37,7 @@ class ContainerScopeTest extends TestCase
 
         $this->assertNull(ContainerScope::getContainer());
 
-        $this->assertTrue(ContainerScope::runGlobal($container, function () {
+        $this->assertTrue(ContainerScope::globalScope($container, function () {
             return $this->iocContainer() === ContainerScope::getContainer();
         }));
 
@@ -51,7 +51,7 @@ class ContainerScopeTest extends TestCase
         $this->assertNull(ContainerScope::getContainer());
 
         try {
-            $this->assertTrue(ContainerScope::runGlobal($container, function () use ($container) {
+            $this->assertTrue(ContainerScope::globalScope($container, function () use ($container) {
                 throw new RuntimeException("exception");
             }));
         } catch (\Throwable $e) {

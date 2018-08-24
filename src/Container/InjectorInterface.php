@@ -29,9 +29,7 @@ interface InjectorInterface
      * @param string           $context Parameter or alias name.
      *
      * @return InjectableInterface
-     *
      * @throws ContainerException
-     * @throws \ErrorException
      */
     public function createInjection(\ReflectionClass $class, string $context = null): InjectableInterface;
 }

@@ -9,6 +9,7 @@
 namespace Spiral\Core;
 
 use Psr\Container\ContainerInterface;
+use ReflectionFunctionAbstract as ContextFunction;
 use Spiral\Core\Container\Autowire;
 use Spiral\Core\Container\InjectableInterface;
 use Spiral\Core\Container\InjectorInterface;
@@ -18,6 +19,7 @@ use Spiral\Core\Exceptions\Container\AutowireException;
 use Spiral\Core\Exceptions\Container\ContainerException;
 use Spiral\Core\Exceptions\Container\InjectionException;
 use Spiral\Core\Exceptions\Container\NotFoundException;
+use Spiral\Core\Exceptions\InvalidArgumentException;
 use Spiral\Core\Exceptions\LogicException;
 
 /**
@@ -35,7 +37,7 @@ use Spiral\Core\Exceptions\LogicException;
  * @see InjectableInterface
  * @see SingletonInterface
  */
-class Container implements ContainerInterface, FactoryInterface, ResolverInterface
+class Container implements ContainerInterface, FactoryInterface, ResolverInterface, ScopeInterface
 {
     /**
      * Parent container responsible for low level dependency configuration (i.e. config based).
@@ -89,7 +91,6 @@ class Container implements ContainerInterface, FactoryInterface, ResolverInterfa
         throw new LogicException("Container is not clonable");
     }
 
-
     /**
      * {@inheritdoc}
      */
@@ -105,14 +106,13 @@ class Container implements ContainerInterface, FactoryInterface, ResolverInterfa
     /**
      * {@inheritdoc}
      *
-     * Context parameter will be passed to class injectors, which makes possible to use this method
-     * as:
+     * Context parameter will be passed to class injectors, which makes possible to use this method as:
+     *
      * $this->container->get(DatabaseInterface::class, 'default');
      *
      * Attention, context ignored when outer container has instance by alias.
      *
      * @param string|null $context Call context.
-     *
      * @throws ContainerException
      */
     public function get($alias, string $context = null)
@@ -121,7 +121,7 @@ class Container implements ContainerInterface, FactoryInterface, ResolverInterfa
             return $this->parent->get($alias);
         }
 
-        if ($alias instanceof AutowireException) {
+        if ($alias instanceof Autowire) {
             return $alias->resolve($this);
         }
 
@@ -233,6 +233,29 @@ class Container implements ContainerInterface, FactoryInterface, ResolverInterfa
     }
 
     /**
+     * @inheritdoc
+     */
+    public function runScope(array $bindings, callable $scope)
+    {
+        $previous = array_fill_keys(array_keys($bindings), null);
+        foreach ($bindings as $alias => $resolver) {
+            if (isset($this->bindings[$alias])) {
+                $previous[$alias] = $this->bindings[$alias];
+            }
+
+            $this->bind($alias, $resolver);
+        }
+
+        try {
+            return $scope();
+        } finally {
+            foreach (array_reverse($previous) as $alias => $resolver) {
+                $this->bindings[$alias] = $resolver;
+            }
+        }
+    }
+
+    /**
      * Bind value resolver to container alias. Resolver can be class name (will be constructed
      * for each method call), function array or Closure (executed every call). Only object resolvers
      * supported by this method.
@@ -286,11 +309,13 @@ class Container implements ContainerInterface, FactoryInterface, ResolverInterfa
      * @param string|object $injector
      *
      * @return self
+     *
+     * @throws InvalidArgumentException
      */
     public function bindInjector(string $class, $injector): Container
     {
         if (!is_string($injector)) {
-            throw new \InvalidArgumentException('Injector can only be set as string binding');
+            throw new InvalidArgumentException('Injector can only be set as string binding');
         }
 
         $this->injectors[$class] = $injector;
@@ -383,12 +408,11 @@ class Container implements ContainerInterface, FactoryInterface, ResolverInterfa
      * @return object
      *
      * @throws AutowireException
-     * @throws \ErrorException
      */
     final protected function autowire(string $class, array $parameters, string $context = null)
     {
         if (!class_exists($class)) {
-            throw new NotFoundException("Undefined class or binding '{$class}'");
+            throw new NotFoundException(sprintf("Undefined class or binding '%s'", $class));
         }
 
         //Automatically create instance
@@ -432,7 +456,6 @@ class Container implements ContainerInterface, FactoryInterface, ResolverInterfa
      * @return mixed|null|object
      *
      * @throws ContainerException
-     * @throws \Interop\Container\Exception\ContainerException
      */
     private function evaluateBinding(
         string $alias,
@@ -450,12 +473,14 @@ class Container implements ContainerInterface, FactoryInterface, ResolverInterfa
         }
 
         if ($target instanceof \Closure) {
-            $reflection = new \ReflectionFunction($target);
+            try {
+                $reflection = new \ReflectionFunction($target);
+            } catch (\ReflectionException $e) {
+                throw new ContainerException($e->getMessage(), $e->getCode(), $e);
+            }
 
             //Invoking Closure with resolved arguments
-            return $reflection->invokeArgs(
-                $this->resolveArguments($reflection, $parameters, $context)
-            );
+            return $reflection->invokeArgs($this->resolveArguments($reflection, $parameters, $context));
         }
 
         if (is_array($target) && isset($target[1])) {
@@ -464,17 +489,20 @@ class Container implements ContainerInterface, FactoryInterface, ResolverInterfa
 
             //Resolver instance (i.e. [ClassName::class, 'method'])
             $resolver = $this->get($resolver);
-            $method = new \ReflectionMethod($resolver, $method);
+
+            try {
+                $method = new \ReflectionMethod($resolver, $method);
+            } catch (\ReflectionException $e) {
+                throw new ContainerException($e->getMessage(), $e->getCode(), $e);
+            }
+
             $method->setAccessible(true);
 
             //Invoking factory method with resolved arguments
-            return $method->invokeArgs(
-                $resolver,
-                $this->resolveArguments($method, $parameters, $context)
-            );
+            return $method->invokeArgs($resolver, $this->resolveArguments($method, $parameters, $context));
         }
 
-        throw new ContainerException("Invalid binding for '{$alias}'");
+        throw new ContainerException(sprintf("Invalid binding for '%s'", $alias));
     }
 
     /**
@@ -487,32 +515,36 @@ class Container implements ContainerInterface, FactoryInterface, ResolverInterfa
      * @return object
      *
      * @throws ContainerException
-     * @throws \ErrorException
      */
     private function createInstance(string $class, array $parameters, string $context = null)
     {
-        $reflection = new \ReflectionClass($class);
+        try {
+            $reflection = new \ReflectionClass($class);
+        } catch (\ReflectionException $e) {
+            throw new ContainerException($e->getMessage(), $e->getCode(), $e);
+        }
 
         //We have to construct class using external injector when we know exact context
         if (empty($parameters) && $this->hasInjector($reflection)) {
             $instance = $this->getInjector($reflection)->createInjection($reflection, $context);
 
             if (!$reflection->isInstance($instance)) {
-                throw new InjectionException("Invalid injection response for '{$reflection->getName()}'");
+                throw new InjectionException(sprintf(
+                    "Invalid injection response for '%s'",
+                    $reflection->getName()
+                ));
             }
 
             return $instance;
         }
 
         if (!$reflection->isInstantiable()) {
-            throw new ContainerException("Class '{$class}' can not be constructed");
+            throw new ContainerException(sprintf("Class '%s' can not be constructed", $class));
         }
 
         if (!empty($constructor = $reflection->getConstructor())) {
             //Using constructor with resolved arguments
-            $instance = $reflection->newInstanceArgs(
-                $this->resolveArguments($constructor, $parameters)
-            );
+            $instance = $reflection->newInstanceArgs($this->resolveArguments($constructor, $parameters));
         } else {
             //No constructor specified
             $instance = $reflection->newInstance();
@@ -539,38 +571,15 @@ class Container implements ContainerInterface, FactoryInterface, ResolverInterfa
         }
 
         if (!$injector instanceof InjectorInterface) {
-            throw new InjectionException(
-                "Class '" . get_class($injector) . "' must be an instance of InjectorInterface for '{$reflection->getName()}'"
-            );
+            throw new InjectionException(sprintf(
+                "Class '%s' must be an instance of InjectorInterface for '%s'",
+                get_class($injector),
+                $reflection->getName()
+            ));
         }
 
         return $injector;
     }
-
-    //    /**
-    //     * {@inheritdoc}
-    //     */
-    //    public function replace(string $alias, $resolver): array
-    //    {
-    //        $payload = [$alias, null];
-    //        if (isset($this->bindings[$alias])) {
-    //            $payload[1] = $this->bindings[$alias];
-    //        }
-    //        $this->bind($alias, $resolver);
-    //        return $payload;
-    //    }
-    //    /**
-    //     * {@inheritdoc}
-    //     */
-    //    public function restore(array $payload)
-    //    {
-    //        list($alias, $resolver) = $payload;
-    //        unset($this->bindings[$alias]);
-    //        if (!empty($resolver)) {
-    //            //Restoring original value
-    //            $this->bindings[$alias] = $resolver;
-    //        }
-    //    }
 
     /**
      * Assert that given value are matched parameter type.
@@ -587,10 +596,11 @@ class Container implements ContainerInterface, FactoryInterface, ResolverInterfa
         $value
     ) {
         if (is_null($value)) {
-            if (
-                !$parameter->isOptional()
-                && !($parameter->isDefaultValueAvailable() && $parameter->getDefaultValue() === null)
-            ) {
+            if ($parameter->isOptional()) {
+                return;
+            }
+
+            if (!($parameter->isDefaultValueAvailable() && $parameter->getDefaultValue() === null)) {
                 throw new ArgumentException($parameter, $context);
             }
 
