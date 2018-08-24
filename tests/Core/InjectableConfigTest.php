@@ -21,6 +21,7 @@ class InjectableConfigTest extends TestCase
 
         $this->assertArrayHasKey('key', $config);
         $this->assertEquals('value', $config['key']);
+
         $this->assertArrayNotHasKey('otherKey', $config);
     }
 
