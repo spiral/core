@@ -363,4 +363,14 @@ class AutowireTest extends TestCase
 
         $this->assertSame('Overwritten', $abc->getName());
     }
+
+    public function testSerialize()
+    {
+        $a = new Container\Autowire(SoftDependedClass::class, [
+            'name' => 'Fixed'
+        ]);
+
+        $b = unserialize(serialize($a));
+        $this->assertEquals($a, $b);
+    }
 }
