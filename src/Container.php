@@ -240,10 +240,12 @@ class Container implements ContainerInterface, FactoryInterface, ResolverInterfa
      */
     public function runScope(array $bindings, callable $scope)
     {
-        $previous = array_fill_keys(array_keys($bindings), null);
+        $cleanup = $previous = [];
         foreach ($bindings as $alias => $resolver) {
             if (isset($this->bindings[$alias])) {
                 $previous[$alias] = $this->bindings[$alias];
+            } else {
+                $cleanup[] = $alias;
             }
 
             $this->bind($alias, $resolver);
@@ -254,6 +256,10 @@ class Container implements ContainerInterface, FactoryInterface, ResolverInterfa
         } finally {
             foreach (array_reverse($previous) as $alias => $resolver) {
                 $this->bindings[$alias] = $resolver;
+            }
+
+            foreach ($cleanup as $alias) {
+                unset($this->bindings[$alias]);
             }
         }
     }
