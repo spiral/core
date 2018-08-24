@@ -10,6 +10,7 @@ namespace Spiral\Core\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Spiral\Core\InjectableConfig;
+use Spiral\Core\Tests\Fixtures\TestConfig;
 
 class InjectableConfigTest extends TestCase
 {
@@ -113,5 +114,21 @@ class InjectableConfigTest extends TestCase
                 'keyB' => 'valueB',
             ]
         ]));
+    }
+
+    /**
+     * @covers \Spiral\Core\InjectableConfig::__set_state()
+     */
+    public function testAliases()
+    {
+        $config = new TestConfig([
+            'aliases' => [
+                'default' => 'value',
+                'value'   => 'another',
+                'another' => 'test'
+            ]
+        ]);
+
+        $this->assertEquals('test', $config->resolveAlias('default'));
     }
 }
