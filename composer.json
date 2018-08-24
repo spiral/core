@@ -1,0 +1,23 @@
+{
+  "name": "spiral/core",
+  "type": "library",
+  "description": "Spiral Core: IoC container, IoC scopes, factory, memory, configuration interfaces",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Wolfy-J",
+      "email": "wolfy.jd@gmail.com"
+    }
+  ],
+  "require": {
+    "php": "^7.1"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "~7.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Spiral\\Core\\": "src/"
+    }
+  }
+}
