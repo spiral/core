@@ -62,6 +62,7 @@ class Container implements
      */
     protected $bindings = [
         ContainerInterface::class => self::class,
+        BinderInterface::class    => self::class,
         FactoryInterface::class   => self::class,
         ScopeInterface::class     => self::class,
         ResolverInterface::class  => self::class
