@@ -114,8 +114,6 @@ class BootloadManager
         ];
 
         foreach ($classes as $class) {
-            $this->classes[] = $class;
-
             $initSchema = ['init' => true, 'boot' => false];
             $bootloader = $container->get($class);
 
