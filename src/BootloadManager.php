@@ -31,19 +31,11 @@ class BootloadManager
     protected $container;
 
     /**
-     * @invisible
-     * @var MemoryInterface
+     * @param Container $container
      */
-    protected $memory = null;
-
-    /**
-     * @param Container       $container
-     * @param MemoryInterface $memory
-     */
-    public function __construct(Container $container, MemoryInterface $memory)
+    public function __construct(Container $container)
     {
         $this->container = $container;
-        $this->memory = $memory;
     }
 
     /**
@@ -59,36 +51,14 @@ class BootloadManager
     /**
      * Bootload set of classes
      *
-     * @param array       $classes
-     * @param string|null $memory Memory section to be used for caching, set to null to disable
-     *                            caching.
+     * @param array $classes
      *
      * @throws BootloadException
      */
-    public function bootload(array $classes, string $memory = null)
+    public function bootload(array $classes)
     {
-        if (!empty($memory)) {
-            $schema = $this->memory->loadData($memory);
-        }
-
-        //Checks if cached schema matches to booted services
-        if (empty($schema) || $schema['snapshot'] != $classes) {
-            //Schema expired or empty
-            try {
-                $schema = $this->generateSchema($classes, $this->container);
-            } catch (\Throwable|ContainerExceptionInterface $e) {
-                throw new BootloadException($e->getMessage(), $e->getCode(), $e);
-            }
-
-            if (!empty($memory)) {
-                $this->memory->saveData($memory, $schema);
-            }
-
-            return;
-        }
-
-        //We can initiate schema thought the cached schema
         try {
+            $schema = $this->generateSchema($classes, $this->container);
             $this->bootSchema($this->container, $schema);
         } catch (\Throwable|ContainerExceptionInterface $e) {
             throw new BootloadException($e->getMessage(), $e->getCode(), $e);
