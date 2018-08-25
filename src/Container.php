@@ -8,7 +8,6 @@
 
 namespace Spiral\Core;
 
-use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use ReflectionFunctionAbstract as ContextFunction;
 use Spiral\Core\Container\Autowire;
@@ -39,7 +38,12 @@ use Spiral\Core\Exceptions\LogicException;
  * @see InjectableInterface
  * @see SingletonInterface
  */
-class Container implements ContainerInterface, FactoryInterface, ResolverInterface, ScopeInterface
+class Container implements
+    ContainerInterface,
+    BinderInterface,
+    FactoryInterface,
+    ResolverInterface,
+    ScopeInterface
 {
     /**
      * Parent container responsible for low level dependency configuration (i.e. config based).
