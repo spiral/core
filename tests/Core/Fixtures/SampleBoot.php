@@ -15,7 +15,8 @@ class SampleBoot extends Bootloader
 {
     const BOOT = true;
 
-    const BINDINGS = ['abc' => self::class];
+    const BINDINGS   = ['abc' => self::class];
+    const SINGLETONS = ['single' => self::class];
 
     public function boot(BinderInterface $binder)
     {

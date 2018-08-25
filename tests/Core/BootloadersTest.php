@@ -23,7 +23,8 @@ class BootloadersTest extends TestCase
         $bootloader->bootload([SampleClass::class, SampleBoot::class]);
 
         $this->assertTrue($container->has('abc'));
-        $this->assertTrue($container->has('cde'));
+        $this->assertTrue($container->hasInstance('cde'));
+        $this->assertTrue($container->has('single'));
 
         $this->assertSame([SampleClass::class, SampleBoot::class], $bootloader->getClasses());
     }
