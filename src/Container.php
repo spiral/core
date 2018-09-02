@@ -154,7 +154,9 @@ class Container implements
             return $this->autowire($alias, $parameters, $context);
         }
 
-        if (is_object($binding = $this->bindings[$alias])) {
+        $binding = $this->bindings[$alias];
+
+        if (is_object($binding)) {
             //When binding is instance, assuming singleton
             return $binding;
         }
@@ -164,7 +166,11 @@ class Container implements
             return $this->make($binding, $parameters, $context);
         }
 
-        $instance = $this->evaluateBinding($alias, $binding[0], $parameters, $context);
+        if ($binding[0] === $alias) {
+            $instance = $this->autowire($alias, $parameters, $context);
+        } else {
+            $instance = $this->evaluateBinding($alias, $binding[0], $parameters, $context);
+        }
 
         if ($binding[1]) {
             //Indicates singleton
@@ -474,7 +480,8 @@ class Container implements
      *
      * @return mixed|null|object
      *
-     * @throws ContainerException
+     * @throws \Error
+     * @throws \Psr\Container\ContainerExceptionInterface
      */
     private function evaluateBinding(
         string $alias,
