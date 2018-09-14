@@ -38,7 +38,7 @@ final class ContainerScope
      * @return mixed
      * @throws \Throwable
      */
-    public static function globalScope(ContainerInterface $container, callable $scope)
+    public static function runScope(ContainerInterface $container, callable $scope)
     {
         list ($previous, self::$container) = [self::$container, $container];
         try {

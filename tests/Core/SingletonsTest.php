@@ -22,6 +22,16 @@ class SingletonsTest extends TestCase
         $this->assertSame($instance, $container->get('sampleClass'));
     }
 
+    public function testSingletonToItself()
+    {
+        $container = new Container();
+        $container->bindSingleton(SampleClass::class, SampleClass::class);
+
+        $sc = $container->get(SampleClass::class);
+        $this->assertTrue($container->hasInstance(SampleClass::class));
+        $this->assertSame($sc, $container->get(SampleClass::class));
+    }
+
     public function testSingletonInstanceWithBinding()
     {
         $container = new Container();

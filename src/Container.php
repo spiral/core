@@ -8,7 +8,6 @@
 
 namespace Spiral\Core;
 
-use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use ReflectionFunctionAbstract as ContextFunction;
 use Spiral\Core\Container\Autowire;
@@ -24,12 +23,13 @@ use Spiral\Core\Exceptions\InvalidArgumentException;
 use Spiral\Core\Exceptions\LogicException;
 
 /**
- * Auto-wiring container: declarative singletons, contextual injections, parent container delegation and
- * ability to lazy wire.
+ * Auto-wiring container: declarative singletons, contextual injections, parent container
+ * delegation and ability to lazy wire.
  *
  * Container does not support setter injections, private properties and etc. Normally it will work
  * with classes only to be as much invisible as possible. Attention, this is hungry implementation
- * of container, meaning it WILL try to resolve dependency unless you specified custom lazy factory.
+ * of container, meaning it WILL try to resolve dependency unless you specified custom lazy
+ * factory.
  *
  * You can use injectors to delegate class resolution to external container.
  *
@@ -38,7 +38,12 @@ use Spiral\Core\Exceptions\LogicException;
  * @see InjectableInterface
  * @see SingletonInterface
  */
-class Container implements ContainerInterface, FactoryInterface, ResolverInterface, ScopeInterface
+class Container implements
+    ContainerInterface,
+    BinderInterface,
+    FactoryInterface,
+    ResolverInterface,
+    ScopeInterface
 {
     /**
      * Parent container responsible for low level dependency configuration (i.e. config based).
@@ -57,7 +62,9 @@ class Container implements ContainerInterface, FactoryInterface, ResolverInterfa
      */
     protected $bindings = [
         ContainerInterface::class => self::class,
+        BinderInterface::class    => self::class,
         FactoryInterface::class   => self::class,
+        ScopeInterface::class     => self::class,
         ResolverInterface::class  => self::class
     ];
 
@@ -107,13 +114,15 @@ class Container implements ContainerInterface, FactoryInterface, ResolverInterfa
     /**
      * {@inheritdoc}
      *
-     * Context parameter will be passed to class injectors, which makes possible to use this method as:
+     * Context parameter will be passed to class injectors, which makes possible to use this method
+     * as:
      *
      * $this->container->get(DatabaseInterface::class, 'default');
      *
      * Attention, context ignored when outer container has instance by alias.
      *
      * @param string|null $context Call context.
+     *
      * @throws ContainerException
      * @throws \Error
      */
@@ -135,6 +144,7 @@ class Container implements ContainerInterface, FactoryInterface, ResolverInterfa
      * {@inheritdoc}
      *
      * @param string|null $context Related to parameter caused injection if any.
+     *
      * @throws \Error
      */
     final public function make(string $alias, $parameters = [], string $context = null)
@@ -144,7 +154,9 @@ class Container implements ContainerInterface, FactoryInterface, ResolverInterfa
             return $this->autowire($alias, $parameters, $context);
         }
 
-        if (is_object($binding = $this->bindings[$alias])) {
+        $binding = $this->bindings[$alias];
+
+        if (is_object($binding)) {
             //When binding is instance, assuming singleton
             return $binding;
         }
@@ -154,7 +166,11 @@ class Container implements ContainerInterface, FactoryInterface, ResolverInterfa
             return $this->make($binding, $parameters, $context);
         }
 
-        $instance = $this->evaluateBinding($alias, $binding[0], $parameters, $context);
+        if ($binding[0] === $alias) {
+            $instance = $this->autowire($alias, $parameters, $context);
+        } else {
+            $instance = $this->evaluateBinding($alias, $binding[0], $parameters, $context);
+        }
 
         if ($binding[1]) {
             //Indicates singleton
@@ -464,7 +480,8 @@ class Container implements ContainerInterface, FactoryInterface, ResolverInterfa
      *
      * @return mixed|null|object
      *
-     * @throws ContainerException
+     * @throws \Error
+     * @throws \Psr\Container\ContainerExceptionInterface
      */
     private function evaluateBinding(
         string $alias,
@@ -489,7 +506,8 @@ class Container implements ContainerInterface, FactoryInterface, ResolverInterfa
             }
 
             //Invoking Closure with resolved arguments
-            return $reflection->invokeArgs($this->resolveArguments($reflection, $parameters, $context));
+            return $reflection->invokeArgs($this->resolveArguments($reflection, $parameters,
+                $context));
         }
 
         if (is_array($target) && isset($target[1])) {
@@ -508,7 +526,8 @@ class Container implements ContainerInterface, FactoryInterface, ResolverInterfa
             $method->setAccessible(true);
 
             //Invoking factory method with resolved arguments
-            return $method->invokeArgs($resolver, $this->resolveArguments($method, $parameters, $context));
+            return $method->invokeArgs($resolver,
+                $this->resolveArguments($method, $parameters, $context));
         }
 
         throw new ContainerException(sprintf("Invalid binding for '%s'", $alias));
@@ -553,7 +572,8 @@ class Container implements ContainerInterface, FactoryInterface, ResolverInterfa
 
         if (!empty($constructor = $reflection->getConstructor())) {
             //Using constructor with resolved arguments
-            $instance = $reflection->newInstanceArgs($this->resolveArguments($constructor, $parameters));
+            $instance = $reflection->newInstanceArgs($this->resolveArguments($constructor,
+                $parameters));
         } else {
             //No constructor specified
             $instance = $reflection->newInstance();
@@ -611,6 +631,7 @@ class Container implements ContainerInterface, FactoryInterface, ResolverInterfa
             ) {
                 throw new ArgumentException($parameter, $context);
             }
+
             return;
         }
 
