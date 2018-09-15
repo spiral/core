@@ -28,4 +28,15 @@ class BootloadersTest extends TestCase
 
         $this->assertSame([SampleClass::class, SampleBoot::class], $bootloader->getClasses());
     }
+
+    /**
+     * @expectedException \Spiral\Core\Exceptions\BootloadException
+     */
+    public function testException()
+    {
+        $container = new Container();
+
+        $bootloader = new BootloadManager($container);
+        $bootloader->bootload(['Invalid']);
+    }
 }
