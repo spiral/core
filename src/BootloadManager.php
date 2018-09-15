@@ -58,107 +58,56 @@ class BootloadManager
     public function bootload(array $classes)
     {
         try {
-            $schema = $this->generateSchema($classes, $this->container);
-            $this->bootSchema($this->container, $schema);
+            $this->boot($classes);
         } catch (\Throwable|ContainerExceptionInterface $e) {
             throw new BootloadException($e->getMessage(), $e->getCode(), $e);
         }
     }
 
     /**
-     * Bootload based on schema.
-     *
-     * @param Container $container
-     * @param array     $schema
-     *
-     * @throws ContainerExceptionInterface
-     * @throws \Error
-     */
-    protected function bootSchema(Container $container, array $schema)
-    {
-        foreach ($schema['bootloaders'] as $bootloader => $options) {
-            $this->classes[] = $bootloader;
-
-            if (array_key_exists('bindings', $options)) {
-                $this->initBindings($container, $options);
-            }
-
-            if ($options['init']) {
-                $object = $container->get($bootloader);
-
-                if ($options['boot']) {
-                    //Booting
-                    $boot = new \ReflectionMethod($object, 'boot');
-                    $boot->invokeArgs($object, $container->resolveArguments($boot));
-                }
-            }
-        }
-    }
-
-    /**
      * Generate cached bindings schema.
      *
-     * @param array     $classes
-     * @param Container $container
-     *
-     * @return array
+     * @param array $classes
      *
      * @throws ContainerExceptionInterface
      * @throws \Error
      */
-    protected function generateSchema(array $classes, Container $container): array
+    protected function boot(array $classes)
     {
-        $schema = [
-            'snapshot'    => $classes,
-            'bootloaders' => []
-        ];
-
         foreach ($classes as $class) {
-            $initSchema = ['init' => true, 'boot' => false];
-            $bootloader = $container->get($class);
+            $this->classes[] = $class;
+            $bootloader = $this->container->get($class);
 
-            if ($bootloader instanceof BootloaderInterface) {
-                $initSchema['bindings'] = $bootloader->defineBindings();
-                $initSchema['singletons'] = $bootloader->defineSingletons();
-
-                $reflection = new \ReflectionClass($bootloader);
-
-                //Can be booted based on it's configuration
-                $initSchema['boot'] = (bool)$reflection->getConstant('BOOT');
-                $initSchema['init'] = $initSchema['boot'];
-
-                //Let's initialize now
-                $this->initBindings($container, $initSchema);
-            } else {
-                $initSchema['init'] = true;
+            if (!$bootloader instanceof BootloaderInterface) {
+                continue;
             }
 
-            //Need more checks here
-            if ($initSchema['boot']) {
+            $reflection = new \ReflectionClass($bootloader);
+
+            $this->initBindings($bootloader->defineBindings(), $bootloader->defineSingletons());
+
+            //Can be booted based on it's configuration
+            if ((bool)$reflection->getConstant('BOOT')) {
                 $boot = new \ReflectionMethod($bootloader, 'boot');
-                $boot->invokeArgs($bootloader, $container->resolveArguments($boot));
+                $boot->invokeArgs($bootloader, $this->container->resolveArguments($boot));
             }
-
-            $schema['bootloaders'][$class] = $initSchema;
         }
-
-        return $schema;
     }
 
     /**
      * Bind declared bindings.
      *
-     * @param Container $container
-     * @param array     $bootSchema
+     * @param array $bindings
+     * @param array $singletons
      */
-    protected function initBindings(Container $container, array $bootSchema)
+    protected function initBindings(array $bindings, array $singletons)
     {
-        foreach ($bootSchema['bindings'] as $aliases => $resolver) {
-            $container->bind($aliases, $resolver);
+        foreach ($bindings as $aliases => $resolver) {
+            $this->container->bind($aliases, $resolver);
         }
 
-        foreach ($bootSchema['singletons'] as $aliases => $resolver) {
-            $container->bindSingleton($aliases, $resolver);
+        foreach ($singletons as $aliases => $resolver) {
+            $this->container->bindSingleton($aliases, $resolver);
         }
     }
 }
