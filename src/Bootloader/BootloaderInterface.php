@@ -5,7 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
-namespace Spiral\Core\Bootloaders;
+namespace Spiral\Core\Bootloader;
 
 /**
  * Similar to laravel service provider, however allowed only to define bindings in a simple form so

@@ -10,16 +10,16 @@ namespace Spiral\Core\Tests;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerExceptionInterface;
 use Spiral\Core\Container;
-use Spiral\Core\Exceptions\Container\ArgumentException;
-use Spiral\Core\Exceptions\Container\AutowireException;
-use Spiral\Core\Exceptions\Container\ContainerException;
-use Spiral\Core\Exceptions\DependencyException;
-use Spiral\Core\Exceptions\LogicException;
+use Spiral\Core\Exception\Container\ArgumentException;
+use Spiral\Core\Exception\Container\AutowireException;
+use Spiral\Core\Exception\Container\ContainerException;
+use Spiral\Core\Exception\DependencyException;
+use Spiral\Core\Exception\LogicException;
 
 class ExceptionsTest extends TestCase
 {
     /**
-     * @expectedException \Spiral\Core\Exceptions\Container\ContainerException
+     * @expectedException \Spiral\Core\Exception\Container\ContainerException
      * @expectedExceptionMessage Invalid binding for 'invalid'
      */
     public function testInvalidBinding()
@@ -39,7 +39,7 @@ class ExceptionsTest extends TestCase
     }
 
     /**
-     * @expectedException \Spiral\Core\Exceptions\Container\ContainerException
+     * @expectedException \Spiral\Core\Exception\Container\ContainerException
      * @expectedExceptionMessage Class Spiral\Core\Tests\InvalidClass does not exist
      */
     public function testInvalidInjectionParameter()

@@ -9,7 +9,7 @@
 namespace Spiral\Core;
 
 use Spiral\Core\Container\InjectorInterface;
-use Spiral\Core\Exceptions\ConfiguratorException;
+use Spiral\Core\Exception\ConfiguratorException;
 
 /**
  * Provides array based configuration for specified config section. In addition configurator

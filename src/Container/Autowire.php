@@ -8,7 +8,7 @@
 namespace Spiral\Core\Container;
 
 use Psr\Container\ContainerExceptionInterface;
-use Spiral\Core\Exceptions\Container\AutowireException;
+use Spiral\Core\Exception\Container\AutowireException;
 use Spiral\Core\FactoryInterface;
 
 /**

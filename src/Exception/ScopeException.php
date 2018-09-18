@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Core\Exceptions;
+namespace Spiral\Core\Exception;
 
 /**
  * Raised in cases when "sugar" code can not be executed (for example there is no shared/static

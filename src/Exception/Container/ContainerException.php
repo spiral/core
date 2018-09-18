@@ -6,10 +6,10 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Core\Exceptions\Container;
+namespace Spiral\Core\Exception\Container;
 
 use Psr\Container\ContainerExceptionInterface;
-use Spiral\Core\Exceptions\DependencyException;
+use Spiral\Core\Exception\DependencyException;
 
 /**
  * Something inside container.

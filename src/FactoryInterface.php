@@ -8,8 +8,8 @@
 
 namespace Spiral\Core;
 
-use Spiral\Core\Exceptions\Container\ArgumentException;
-use Spiral\Core\Exceptions\Container\AutowireException;
+use Spiral\Core\Exception\Container\ArgumentException;
+use Spiral\Core\Exception\Container\AutowireException;
 
 /**
  * Declares ability to construct classes.

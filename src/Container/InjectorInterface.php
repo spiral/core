@@ -8,7 +8,7 @@
 
 namespace Spiral\Core\Container;
 
-use Spiral\Core\Exceptions\Container\ContainerException;
+use Spiral\Core\Exception\Container\ContainerException;
 
 /**
  * Magic spiral interface used to resolve dependencies based on their context . Container may

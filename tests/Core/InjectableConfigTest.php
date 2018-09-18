@@ -62,7 +62,7 @@ class InjectableConfigTest extends TestCase
     }
 
     /**
-     * @expectedException \Spiral\Core\Exceptions\ConfigException
+     * @expectedException \Spiral\Core\Exception\ConfigException
      * @expectedExceptionMessage Unable to change configuration data, configs are treated as
      *                           immutable by default
      */
@@ -77,7 +77,7 @@ class InjectableConfigTest extends TestCase
     }
 
     /**
-     * @expectedException \Spiral\Core\Exceptions\ConfigException
+     * @expectedException \Spiral\Core\Exception\ConfigException
      * @expectedExceptionMessage Unable to change configuration data, configs are treated as
      *                           immutable by default
      */
@@ -92,7 +92,7 @@ class InjectableConfigTest extends TestCase
     }
 
     /**
-     * @expectedException \Spiral\Core\Exceptions\ConfigException
+     * @expectedException \Spiral\Core\Exception\ConfigException
      * @expectedExceptionMessage Undefined configuration key 'keyC'
      */
     public function testGetError()

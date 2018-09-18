@@ -9,7 +9,7 @@
 namespace Spiral\Core;
 
 use Spiral\Core\Container\InjectableInterface;
-use Spiral\Core\Exceptions\ConfigException;
+use Spiral\Core\Exception\ConfigException;
 
 /**
  * Generic implementation of array based configuration.

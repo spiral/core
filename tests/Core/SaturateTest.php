@@ -37,7 +37,7 @@ class SaturateTest extends TestCase
     }
 
     /**
-     * @expectedException \Spiral\Core\Exceptions\ScopeException
+     * @expectedException \Spiral\Core\Exception\ScopeException
      */
     public function testSaturateException()
     {
@@ -45,7 +45,7 @@ class SaturateTest extends TestCase
     }
 
     /**
-     * @expectedException \Spiral\Core\Exceptions\ScopeException
+     * @expectedException \Spiral\Core\Exception\ScopeException
      */
     public function testSaturateExceptionBinding()
     {

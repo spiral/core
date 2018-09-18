@@ -9,8 +9,8 @@
 namespace Spiral\Core;
 
 use Psr\Container\ContainerExceptionInterface;
-use Spiral\Core\Bootloaders\BootloaderInterface;
-use Spiral\Core\Exceptions\BootloadException;
+use Spiral\Core\Bootloader\BootloaderInterface;
+use Spiral\Core\Exception\BootloadException;
 
 /**
  * Provides ability to bootload ServiceProviders.

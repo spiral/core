@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Core\Bootloaders;
+namespace Spiral\Core\Bootloader;
 
 /**
  * Provides ability to initiate set of container bindings using simple string form without closures.

@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Core\Exceptions;
+namespace Spiral\Core\Exception;
 
 /**
  * Configuration specific exceptions.

@@ -14,13 +14,13 @@ use Spiral\Core\Container\Autowire;
 use Spiral\Core\Container\InjectableInterface;
 use Spiral\Core\Container\InjectorInterface;
 use Spiral\Core\Container\SingletonInterface;
-use Spiral\Core\Exceptions\Container\ArgumentException;
-use Spiral\Core\Exceptions\Container\AutowireException;
-use Spiral\Core\Exceptions\Container\ContainerException;
-use Spiral\Core\Exceptions\Container\InjectionException;
-use Spiral\Core\Exceptions\Container\NotFoundException;
-use Spiral\Core\Exceptions\InvalidArgumentException;
-use Spiral\Core\Exceptions\LogicException;
+use Spiral\Core\Exception\Container\ArgumentException;
+use Spiral\Core\Exception\Container\AutowireException;
+use Spiral\Core\Exception\Container\ContainerException;
+use Spiral\Core\Exception\Container\InjectionException;
+use Spiral\Core\Exception\Container\NotFoundException;
+use Spiral\Core\Exception\InvalidArgumentException;
+use Spiral\Core\Exception\LogicException;
 
 /**
  * Auto-wiring container: declarative singletons, contextual injections, parent container
@@ -38,7 +38,7 @@ use Spiral\Core\Exceptions\LogicException;
  * @see InjectableInterface
  * @see SingletonInterface
  */
-class Container implements
+final class Container implements
     ContainerInterface,
     BinderInterface,
     FactoryInterface,

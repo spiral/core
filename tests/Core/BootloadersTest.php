@@ -30,7 +30,7 @@ class BootloadersTest extends TestCase
     }
 
     /**
-     * @expectedException \Spiral\Core\Exceptions\BootloadException
+     * @expectedException \Spiral\Core\Exception\BootloadException
      */
     public function testException()
     {

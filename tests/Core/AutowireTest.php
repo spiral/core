@@ -47,7 +47,7 @@ class AutowireTest extends TestCase
     }
 
     /**
-     * @expectedException \Spiral\Core\Exceptions\Container\ArgumentException
+     * @expectedException \Spiral\Core\Exception\Container\ArgumentException
      * @expectedExceptionMessage Unable to resolve 'name' argument in
      *                           'Spiral\Tests\Fixtures\Bucket::__construct'
      */
@@ -118,7 +118,7 @@ class AutowireTest extends TestCase
     }
 
     /**
-     * @expectedException \Spiral\Core\Exceptions\Container\NotFoundException
+     * @expectedException \Spiral\Core\Exception\Container\NotFoundException
      * @expectedExceptionMessage Undefined class or binding 'WrongClass'
      */
     public function testAutowireException()
@@ -187,7 +187,7 @@ class AutowireTest extends TestCase
     }
 
     /**
-     * @expectedException \Spiral\Core\Exceptions\Container\ArgumentException
+     * @expectedException \Spiral\Core\Exception\Container\ArgumentException
      * @expectedExceptionMessage  Unable to resolve 'string' argument in
      *                            'Spiral\Tests\Core\Fixtures\TypedClass::__construct'
      */
@@ -206,7 +206,7 @@ class AutowireTest extends TestCase
     }
 
     /**
-     * @expectedException \Spiral\Core\Exceptions\Container\ArgumentException
+     * @expectedException \Spiral\Core\Exception\Container\ArgumentException
      * @expectedExceptionMessage  Unable to resolve 'int' argument in
      *                            'Spiral\Tests\Core\Fixtures\TypedClass::__construct'
      */
@@ -225,7 +225,7 @@ class AutowireTest extends TestCase
     }
 
     /**
-     * @expectedException \Spiral\Core\Exceptions\Container\ArgumentException
+     * @expectedException \Spiral\Core\Exception\Container\ArgumentException
      * @expectedExceptionMessage  Unable to resolve 'float' argument in
      *                            'Spiral\Tests\Core\Fixtures\TypedClass::__construct'
      */
@@ -244,7 +244,7 @@ class AutowireTest extends TestCase
     }
 
     /**
-     * @expectedException \Spiral\Core\Exceptions\Container\ArgumentException
+     * @expectedException \Spiral\Core\Exception\Container\ArgumentException
      * @expectedExceptionMessage  Unable to resolve 'bool' argument in
      *                            'Spiral\Tests\Core\Fixtures\TypedClass::__construct'
      */
@@ -263,7 +263,7 @@ class AutowireTest extends TestCase
     }
 
     /**
-     * @expectedException \Spiral\Core\Exceptions\Container\ArgumentException
+     * @expectedException \Spiral\Core\Exception\Container\ArgumentException
      * @expectedExceptionMessage  Unable to resolve 'array' argument in
      *                            'Spiral\Tests\Core\Fixtures\TypedClass::__construct'
      */
@@ -383,7 +383,6 @@ class AutowireTest extends TestCase
         $a = new Container\Autowire(SoftDependedClass::class, [
             'name' => 'Fixed'
         ]);
-
 
         $b = Container\Autowire::__set_state([
             'alias'      => SoftDependedClass::class,

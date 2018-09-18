@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Core\Exceptions;
+namespace Spiral\Core\Exception;
 
 /**
  * Raised when non allowed operations applied to configuration data.

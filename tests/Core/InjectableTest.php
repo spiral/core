@@ -19,7 +19,7 @@ use Spiral\Core\Tests\Fixtures\TestConfig;
 class InjectableTest extends TestCase
 {
     /**
-     * @expectedException \Spiral\Core\Exceptions\Container\AutowireException
+     * @expectedException \Spiral\Core\Exception\Container\AutowireException
      * @expectedExceptionMessage Undefined class or binding 'Spiral\Core\ConfiguratorInterface'
      */
     public function testMissingInjector()
@@ -29,7 +29,7 @@ class InjectableTest extends TestCase
     }
 
     /**
-     * @expectedException \Spiral\Core\Exceptions\Container\InjectionException
+     * @expectedException \Spiral\Core\Exception\Container\InjectionException
      * @expectedExceptionMessage Class 'Spiral\Core\Tests\Fixtures\InvalidInjector' must be an
      *                           instance of InjectorInterface for
      *                           'Spiral\Core\Tests\Fixtures\TestConfig'
@@ -43,7 +43,7 @@ class InjectableTest extends TestCase
     }
 
     /**
-     * @expectedException \Spiral\Core\Exceptions\Container\AutowireException
+     * @expectedException \Spiral\Core\Exception\Container\AutowireException
      * @expectedExceptionMessage Undefined class or binding 'invalid-injector'
      */
     public function testInvalidInjectorBinding()
@@ -55,7 +55,7 @@ class InjectableTest extends TestCase
     }
 
     /**
-     * @expectedException \Spiral\Core\Exceptions\Container\InjectionException
+     * @expectedException \Spiral\Core\Exception\Container\InjectionException
      * @expectedExceptionMessage Class 'Spiral\Core\Tests\Fixtures\InvalidInjector' must be an
      *                           instance of InjectorInterface for
      *                           'Spiral\Core\Tests\Fixtures\TestConfig'
@@ -102,7 +102,7 @@ class InjectableTest extends TestCase
     }
 
     /**
-     * @expectedException \Spiral\Core\Exceptions\Container\AutowireException
+     * @expectedException \Spiral\Core\Exception\Container\AutowireException
      * @expectedExceptionMessage Undefined class or binding 'invalid-configurator'
      */
     public function testInjectorOuterBinding()
@@ -114,7 +114,7 @@ class InjectableTest extends TestCase
     }
 
     /**
-     * @expectedException \Spiral\Core\Exceptions\Container\InjectionException
+     * @expectedException \Spiral\Core\Exception\Container\InjectionException
      * @expectedExceptionMessage Invalid injection response for
      *                           'Spiral\Core\Tests\Fixtures\TestConfig'
      */

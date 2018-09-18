@@ -10,7 +10,7 @@ namespace Spiral\Core\Traits;
 
 use Psr\Container\ContainerExceptionInterface;
 use Spiral\Core\ContainerScope;
-use Spiral\Core\Exceptions\ScopeException;
+use Spiral\Core\Exception\ScopeException;
 
 /**
  * Saturate optional constructor or method argument (class) using internal (usually static)

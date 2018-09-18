@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Core\Exceptions\Container;
+namespace Spiral\Core\Exception\Container;
 
 /**
  * When class can not be created.

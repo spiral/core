@@ -9,7 +9,7 @@
 namespace Spiral\Core;
 
 use ReflectionFunctionAbstract as ContextFunction;
-use Spiral\Core\Exceptions\Container\ArgumentException;
+use Spiral\Core\Exception\Container\ArgumentException;
 
 /**
  * Has to resolve arguments (somehow) or die for specified method, function or class constructor.

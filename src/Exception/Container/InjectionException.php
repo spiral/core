@@ -6,7 +6,7 @@
  * @author    Anton Titov (Wolfy-J)
  */
 
-namespace Spiral\Core\Exceptions\Container;
+namespace Spiral\Core\Exception\Container;
 
 /**
  * Rare cases when spiral container can't resolve controllable injection.

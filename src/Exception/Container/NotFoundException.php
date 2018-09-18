@@ -5,7 +5,7 @@
  * @author Wolfy-J
  */
 
-namespace Spiral\Core\Exceptions\Container;
+namespace Spiral\Core\Exception\Container;
 
 use Psr\Container\NotFoundExceptionInterface;
 

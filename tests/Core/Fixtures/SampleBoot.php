@@ -9,7 +9,7 @@
 namespace Spiral\Core\Tests\Fixtures;
 
 use Spiral\Core\BinderInterface;
-use Spiral\Core\Bootloaders\Bootloader;
+use Spiral\Core\Bootloader\Bootloader;
 
 class SampleBoot extends Bootloader
 {

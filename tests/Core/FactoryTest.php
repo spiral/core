@@ -87,7 +87,7 @@ class FactoryTest extends TestCase
     }
 
     /**
-     * @expectedException \Spiral\Core\Exceptions\Container\ContainerException
+     * @expectedException \Spiral\Core\Exception\Container\ContainerException
      */
     public function testConstructAbstract()
     {
