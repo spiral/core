@@ -27,7 +27,6 @@ trait SaturateTrait
      *
      * @param mixed  $default Default value.
      * @param string $class   Requested class.
-     *
      * @return mixed
      *
      * @throws ScopeException

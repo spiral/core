@@ -19,7 +19,6 @@ interface MemoryInterface
      * convention allows to store serializable (var_export-able) data.
      *
      * @param string $section Non case sensitive.
-     *
      * @return string|array|null
      */
     public function loadData(string $section);

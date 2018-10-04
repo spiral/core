@@ -287,7 +287,6 @@ final class Container implements
      *
      * @param string                $alias
      * @param string|array|callable $resolver
-     *
      * @return self
      */
     final public function bind(string $alias, $resolver): Container
@@ -310,7 +309,6 @@ final class Container implements
      *
      * @param string                $alias
      * @param string|array|callable $resolver
-     *
      * @return self
      */
     final public function bindSingleton(string $alias, $resolver): Container
@@ -332,7 +330,6 @@ final class Container implements
      *
      * @param string        $class
      * @param string|object $injector
-     *
      * @return self
      *
      * @throws InvalidArgumentException
@@ -352,7 +349,6 @@ final class Container implements
      * Check if given class has associated injector.
      *
      * @param \ReflectionClass $reflection
-     *
      * @return bool
      */
     public function hasInjector(\ReflectionClass $reflection): bool
@@ -369,7 +365,6 @@ final class Container implements
      * Check if alias points to constructed instance (singleton).
      *
      * @param string $alias
-     *
      * @return bool
      */
     final public function hasInstance(string $alias): bool
@@ -429,7 +424,6 @@ final class Container implements
      * @param string $class
      * @param array  $parameters
      * @param string $context
-     *
      * @return object
      *
      * @throws AutowireException
@@ -453,7 +447,6 @@ final class Container implements
      *
      * @param object $instance   Created object.
      * @param array  $parameters Parameters which been passed with created instance.
-     *
      * @return object
      */
     protected function registerInstance($instance, array $parameters)
@@ -477,7 +470,6 @@ final class Container implements
      * @param mixed       $target Value binded by user.
      * @param array       $parameters
      * @param string|null $context
-     *
      * @return mixed|null|object
      *
      * @throws \Error
@@ -539,7 +531,6 @@ final class Container implements
      * @param string      $class
      * @param array       $parameters Constructor parameters.
      * @param string|null $context
-     *
      * @return object
      *
      * @throws ContainerException
@@ -586,7 +577,6 @@ final class Container implements
      * Get injector associated with given class.
      *
      * @param \ReflectionClass $reflection
-     *
      * @return InjectorInterface
      */
     private function getInjector(\ReflectionClass $reflection): InjectorInterface

@@ -37,7 +37,6 @@ final class Autowire
     /**
      * @param FactoryInterface $factory
      * @param array            $parameters Context specific parameters (always prior to declared ones).
-     *
      * @return mixed
      *
      * @throws AutowireException  No entry was found for this identifier.
@@ -50,7 +49,6 @@ final class Autowire
 
     /**
      * @param $an_array
-     *
      * @return static
      */
     public static function __set_state($an_array)

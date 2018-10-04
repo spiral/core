@@ -27,8 +27,8 @@ interface InjectorInterface
      *
      * @param \ReflectionClass $class   Request class type.
      * @param string           $context Parameter or alias name.
-     *
      * @return object
+     *
      * @throws ContainerException
      */
     public function createInjection(\ReflectionClass $class, string $context = null);

@@ -15,7 +15,7 @@ trait AliasTrait
 {
     /**
      * @param string $alias
-     *
+
      * @return string
      */
     public function resolveAlias(string $alias): string

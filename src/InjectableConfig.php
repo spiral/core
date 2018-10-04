@@ -20,7 +20,7 @@ use Spiral\Core\Exception\ConfigException;
  */
 class InjectableConfig implements InjectableInterface, \IteratorAggregate, \ArrayAccess
 {
-    const INJECTOR = ConfiguratorInterface::class;
+    const INJECTOR = ConfigsInterface::class;
 
     /**
      * Configuration data.

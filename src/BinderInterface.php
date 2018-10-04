@@ -36,7 +36,6 @@ interface BinderInterface
      * Check if alias points to constructed instance (singleton).
      *
      * @param string $alias
-     *
      * @return bool
      */
     public function hasInstance(string $alias);

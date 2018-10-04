@@ -10,7 +10,7 @@ namespace Spiral\Tests\Core;
 
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
-use Spiral\Core\ConfiguratorInterface;
+use Spiral\Core\ConfigsInterface;
 use Spiral\Core\Container;
 use Spiral\Core\Tests\Fixtures\InvalidInjector;
 use Spiral\Core\Tests\Fixtures\SampleClass;
@@ -20,7 +20,7 @@ class InjectableTest extends TestCase
 {
     /**
      * @expectedException \Spiral\Core\Exception\Container\AutowireException
-     * @expectedExceptionMessage Undefined class or binding 'Spiral\Core\ConfiguratorInterface'
+     * @expectedExceptionMessage Undefined class or binding 'Spiral\Core\ConfigsInterface'
      */
     public function testMissingInjector()
     {
@@ -108,7 +108,7 @@ class InjectableTest extends TestCase
     public function testInjectorOuterBinding()
     {
         $container = new Container();
-        $container->bind(ConfiguratorInterface::class, 'invalid-configurator');
+        $container->bind(ConfigsInterface::class, 'invalid-configurator');
 
         $container->get(TestConfig::class);
     }
@@ -122,8 +122,8 @@ class InjectableTest extends TestCase
     {
         $container = new Container();
 
-        $configurator = m::mock(ConfiguratorInterface::class);
-        $container->bind(ConfiguratorInterface::class, $configurator);
+        $configurator = m::mock(ConfigsInterface::class);
+        $container->bind(ConfigsInterface::class, $configurator);
 
         $configurator->shouldReceive('createInjection')->andReturn(new SampleClass());
 
@@ -132,11 +132,11 @@ class InjectableTest extends TestCase
 
     public function testInjector()
     {
-        $configurator = m::mock(ConfiguratorInterface::class);
+        $configurator = m::mock(ConfigsInterface::class);
         $expected = new TestConfig();
 
         $container = new Container();
-        $container->bind(ConfiguratorInterface::class, $configurator);
+        $container->bind(ConfigsInterface::class, $configurator);
 
         $configurator->shouldReceive('createInjection')->with(
             m::on(function (\ReflectionClass $r) {
@@ -150,11 +150,11 @@ class InjectableTest extends TestCase
 
     public function testInjectorWithContext()
     {
-        $configurator = m::mock(ConfiguratorInterface::class);
+        $configurator = m::mock(ConfigsInterface::class);
         $expected = new TestConfig();
 
         $container = new Container();
-        $container->bind(ConfiguratorInterface::class, $configurator);
+        $container->bind(ConfigsInterface::class, $configurator);
 
         $configurator->shouldReceive('createInjection')->with(
             m::on(function (\ReflectionClass $r) {
@@ -168,11 +168,11 @@ class InjectableTest extends TestCase
 
     public function testInjectorForMethod()
     {
-        $configurator = m::mock(ConfiguratorInterface::class);
+        $configurator = m::mock(ConfigsInterface::class);
         $expected = new TestConfig();
 
         $container = new Container();
-        $container->bind(ConfiguratorInterface::class, $configurator);
+        $container->bind(ConfigsInterface::class, $configurator);
 
         $configurator->shouldReceive('createInjection')->with(
             m::on(function (\ReflectionClass $r) {

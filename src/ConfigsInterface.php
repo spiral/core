@@ -15,14 +15,13 @@ use Spiral\Core\Exception\ConfiguratorException;
  * Provides array based configuration for specified config section. In addition configurator
  * interface is responsible for contextual config injections.
  */
-interface ConfiguratorInterface extends InjectorInterface
+interface ConfigsInterface extends InjectorInterface
 {
     /**
      * Return config for one specified section. Config has to be returned in component specific
      * array.
      *
      * @param string $section
-     *
      * @return array
      *
      * @throws ConfiguratorException
