@@ -15,7 +15,8 @@ interface DependedInterface
 {
     /**
      * Return class names of bootloders current bootloader depends on.
-     * Bootloaders will be initiated automatically.
+     * Related bootloaders will be initiated automatically with nested
+     * dependencies.
      *
      * @return array
      */
