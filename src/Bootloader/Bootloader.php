@@ -17,11 +17,10 @@ namespace Spiral\Core\Bootloader;
  * Attention, you are able to define your own set of shared (short bindings) components in your
  * bootloader, DO NOT share your business models this way - use regular DI.
  */
-abstract class Bootloader implements BootloaderInterface, DependedInterface
+abstract class Bootloader implements BootloaderInterface
 {
-    const BINDINGS     = [];
-    const SINGLETONS   = [];
-    const DEPENDENCIES = [];
+    const BINDINGS   = [];
+    const SINGLETONS = [];
 
     /**
      * {@inheritdoc}
@@ -37,13 +36,5 @@ abstract class Bootloader implements BootloaderInterface, DependedInterface
     public function defineSingletons(): array
     {
         return static::SINGLETONS;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function defineDependencies(): array
-    {
-        return static::DEPENDENCIES;
     }
 }
