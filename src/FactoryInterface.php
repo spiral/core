@@ -22,7 +22,7 @@ interface FactoryInterface
     /**
      * Create instance of requested class using binding class aliases and set of parameters provided
      * by user, rest of constructor parameters must be filled by container. Method might return
-     * pre-constructed singleton!
+     * pre-constructed singleton when no parameters are specified.
      *
      * @param string $alias
      * @param array  $parameters Parameters to construct new class.
@@ -32,5 +32,5 @@ interface FactoryInterface
      * @throws AutowireException
      * @throws ArgumentException
      */
-    public function make(string $alias, $parameters = []);
+    public function make(string $alias, array $parameters = []);
 }
