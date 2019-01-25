@@ -1,8 +1,10 @@
 <?php
+declare(strict_types=1);
 /**
- * components
+ * Spiral Framework.
  *
- * @author    Wolfy-J
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
  */
 
 namespace Spiral\Core\Container;
