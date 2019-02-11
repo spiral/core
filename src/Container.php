@@ -499,8 +499,9 @@ final class Container implements
             }
 
             //Invoking Closure with resolved arguments
-            return $reflection->invokeArgs($this->resolveArguments($reflection, $parameters,
-                $context));
+            return $reflection->invokeArgs(
+                $this->resolveArguments($reflection, $parameters, $context)
+            );
         }
 
         if (is_array($target) && isset($target[1])) {
@@ -519,8 +520,10 @@ final class Container implements
             $method->setAccessible(true);
 
             //Invoking factory method with resolved arguments
-            return $method->invokeArgs($resolver,
-                $this->resolveArguments($method, $parameters, $context));
+            return $method->invokeArgs(
+                $resolver,
+                $this->resolveArguments($method, $parameters, $context)
+            );
         }
 
         throw new ContainerException(sprintf("Invalid binding for '%s'", $alias));
@@ -564,8 +567,9 @@ final class Container implements
 
         if (!empty($constructor = $reflection->getConstructor())) {
             //Using constructor with resolved arguments
-            $instance = $reflection->newInstanceArgs($this->resolveArguments($constructor,
-                $parameters));
+            $instance = $reflection->newInstanceArgs(
+                $this->resolveArguments($constructor, $parameters)
+            );
         } else {
             //No constructor specified
             $instance = $reflection->newInstance();
