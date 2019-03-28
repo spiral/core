@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 /**
  * Spiral Framework.
  *
@@ -12,6 +12,7 @@ use Psr\Container\ContainerInterface;
 
 /**
  * Scope class provides ability to enable or disable global container access within specific access scope.
+ * @internal
  */
 final class ContainerScope
 {

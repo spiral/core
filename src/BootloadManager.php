@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 /**
  * Spiral Framework.
  *
@@ -10,6 +10,7 @@ namespace Spiral\Core;
 
 use Psr\Container\ContainerExceptionInterface;
 use Spiral\Core\Bootloader\BootloaderInterface;
+use Spiral\Core\Bootloader\DependedInterface;
 use Spiral\Core\Exception\BootloadException;
 
 /**
@@ -49,7 +50,13 @@ class BootloadManager
     }
 
     /**
-     * Bootload set of classes
+     * Bootload set of classes. Support short and extended syntax with
+     * bootload options (to be passed into boot method).
+     *
+     * [
+     *    SimpleBootloader::class,
+     *    CustomizedBootloader::class => ["option" => "value"]
+     * ]
      *
      * @param array $classes
      *
@@ -65,16 +72,26 @@ class BootloadManager
     }
 
     /**
-     * Generate cached bindings schema.
+     * Bootloader all given classes.
      *
      * @param array $classes
      *
      * @throws ContainerExceptionInterface
-     * @throws \Error
+     * @throws \ReflectionException
      */
     protected function boot(array $classes)
     {
-        foreach ($classes as $class) {
+        foreach ($classes as $class => $options) {
+            // default bootload syntax as simple array
+            if (is_string($options)) {
+                $class = $options;
+                $options = [];
+            }
+
+            if (in_array($class, $this->classes)) {
+                continue;
+            }
+
             $this->classes[] = $class;
             $bootloader = $this->container->get($class);
 
@@ -82,15 +99,27 @@ class BootloadManager
                 continue;
             }
 
-            $reflection = new \ReflectionClass($bootloader);
+            $this->initBootloader($bootloader, $options);
+        }
+    }
 
-            $this->initBindings($bootloader->defineBindings(), $bootloader->defineSingletons());
+    /**
+     * @param BootloaderInterface $bootloader
+     * @param array               $options
+     *
+     * @throws \ReflectionException
+     */
+    protected function initBootloader(BootloaderInterface $bootloader, array $options = [])
+    {
+        if ($bootloader instanceof DependedInterface) {
+            $this->boot($bootloader->defineDependencies());
+        }
 
-            //Can be booted based on it's configuration
-            if ((bool)$reflection->getConstant('BOOT')) {
-                $boot = new \ReflectionMethod($bootloader, 'boot');
-                $boot->invokeArgs($bootloader, $this->container->resolveArguments($boot));
-            }
+        $this->initBindings($bootloader->defineBindings(), $bootloader->defineSingletons());
+
+        if ((new \ReflectionClass($bootloader))->hasMethod('boot')) {
+            $boot = new \ReflectionMethod($bootloader, 'boot');
+            $boot->invokeArgs($bootloader, $this->container->resolveArguments($boot, $options));
         }
     }
 

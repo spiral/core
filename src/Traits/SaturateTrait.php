@@ -17,7 +17,7 @@ use Spiral\Core\Exception\ScopeException;
  * container. In most of cases trait is doing nothing since spiral Container populates even
  * optional class dependencies.
  *
- * Avoid using this trait in custom code, it's only a development sugar.
+ * @internal
  */
 trait SaturateTrait
 {

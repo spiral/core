@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 /**
  * Spiral Framework.
  *
@@ -13,10 +13,6 @@ use Spiral\Core\Exception\ConfigException;
 
 /**
  * Generic implementation of array based configuration.
- *
- * Attention! Config has to be serialiable and be depended ONLY on environment or runtime
- * modifications/requests. No custom logic is allowed to initiate config, in other case config cache
- * will be invalid (pss... there is no config cache anymore).
  */
 class InjectableConfig implements InjectableInterface, \IteratorAggregate, \ArrayAccess
 {

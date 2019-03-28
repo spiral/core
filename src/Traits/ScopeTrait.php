@@ -13,6 +13,8 @@ use Spiral\Core\ContainerScope;
 
 /**
  * Trait provides access to global container scope if any.
+ *
+ * @internal
  */
 trait ScopeTrait
 {
