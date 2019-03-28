@@ -147,7 +147,7 @@ final class Container implements
      *
      * @throws \Error
      */
-    final public function make(string $alias, $parameters = [], string $context = null)
+    final public function make(string $alias, array $parameters = [], string $context = null)
     {
         if (!isset($this->bindings[$alias])) {
             //No direct instructions how to construct class, make is automatically
