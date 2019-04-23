@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+declare(strict_types=1);
 
 namespace Spiral\Core;
 
@@ -12,6 +13,7 @@ use Psr\Container\ContainerInterface;
 
 /**
  * Scope class provides ability to enable or disable global container access within specific access scope.
+ *
  * @internal
  */
 final class ContainerScope

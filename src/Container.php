@@ -1,10 +1,11 @@
-<?php declare(strict_types=1);
+<?php
 /**
  * Spiral Framework.
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+declare(strict_types=1);
 
 namespace Spiral\Core;
 
@@ -46,13 +47,6 @@ final class Container implements
     ScopeInterface
 {
     /**
-     * Parent container responsible for low level dependency configuration (i.e. config based).
-     *
-     * @var ContainerInterface
-     */
-    private $parent = null;
-
-    /**
      * IoC bindings.
      *
      * @what-if private
@@ -60,7 +54,7 @@ final class Container implements
      *
      * @var array
      */
-    protected $bindings = [
+    private $bindings = [
         ContainerInterface::class => self::class,
         BinderInterface::class    => self::class,
         FactoryInterface::class   => self::class,
@@ -80,13 +74,10 @@ final class Container implements
     protected $injectors = [];
 
     /**
-     * Provide outer container in order to proxy get and has requests.
-     *
-     * @param ContainerInterface|null $parent
+     * Container constructor.
      */
-    public function __construct(ContainerInterface $parent = null)
+    public function __construct()
     {
-        $this->parent = $parent;
         $this->bindings[static::class] = self::class;
         $this->bindings[self::class] = $this;
     }
@@ -104,10 +95,6 @@ final class Container implements
      */
     public function has($alias)
     {
-        if ($this->parent !== null && $this->parent->has($alias)) {
-            return true;
-        }
-
         return array_key_exists($alias, $this->bindings);
     }
 
@@ -128,10 +115,6 @@ final class Container implements
      */
     public function get($alias, string $context = null)
     {
-        if ($this->parent !== null && $this->parent->has($alias)) {
-            return $this->parent->get($alias);
-        }
-
         if ($alias instanceof Autowire) {
             return $alias->resolve($this);
         }
@@ -225,6 +208,7 @@ final class Container implements
                 if ($parameter->isDefaultValueAvailable()) {
                     //Default value
                     $arguments[] = $parameter->getDefaultValue();
+
                     continue;
                 }
 

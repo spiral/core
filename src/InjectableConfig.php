@@ -5,6 +5,7 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+declare(strict_types=1);
 
 namespace Spiral\Core;
 
@@ -14,7 +15,7 @@ use Spiral\Core\Exception\ConfigException;
 /**
  * Generic implementation of array based configuration.
  */
-class InjectableConfig implements InjectableInterface, \IteratorAggregate, \ArrayAccess
+abstract class InjectableConfig implements InjectableInterface, \IteratorAggregate, \ArrayAccess
 {
     const INJECTOR = ConfigsInterface::class;
 

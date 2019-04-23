@@ -5,11 +5,12 @@
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+declare(strict_types=1);
 
 namespace Spiral\Core\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Spiral\Core\InjectableConfig;
+use Spiral\Core\Tests\Fixtures\TestConfig;
 use Spiral\Core\Traits\Config\AliasTrait;
 
 class InjectableConfigTest extends TestCase
@@ -26,7 +27,7 @@ class InjectableConfigTest extends TestCase
 
     public function testArrayAccess()
     {
-        $config = new InjectableConfig([
+        $config = new TestConfig([
             'key' => 'value',
         ]);
 
@@ -38,7 +39,7 @@ class InjectableConfigTest extends TestCase
 
     public function testToArray()
     {
-        $config = new InjectableConfig([
+        $config = new TestConfig([
             'keyA' => 'value',
             'keyB' => 'valueB',
         ]);
@@ -51,7 +52,7 @@ class InjectableConfigTest extends TestCase
 
     public function testIteration()
     {
-        $config = new InjectableConfig([
+        $config = new TestConfig([
             'keyA' => 'value',
             'keyB' => 'valueB',
         ]);
@@ -68,7 +69,7 @@ class InjectableConfigTest extends TestCase
      */
     public function testWriteError()
     {
-        $config = new InjectableConfig([
+        $config = new TestConfig([
             'keyA' => 'value',
             'keyB' => 'valueB',
         ]);
@@ -83,7 +84,7 @@ class InjectableConfigTest extends TestCase
      */
     public function testUnsetError()
     {
-        $config = new InjectableConfig([
+        $config = new TestConfig([
             'keyA' => 'value',
             'keyB' => 'valueB',
         ]);
@@ -97,7 +98,7 @@ class InjectableConfigTest extends TestCase
      */
     public function testGetError()
     {
-        $config = new InjectableConfig([
+        $config = new TestConfig([
             'keyA' => 'value',
             'keyB' => 'valueB',
         ]);
@@ -110,7 +111,7 @@ class InjectableConfigTest extends TestCase
      */
     public function testSerialize()
     {
-        $config = new InjectableConfig([
+        $config = new TestConfig([
             'keyA' => 'value',
             'keyB' => 'valueB',
         ]);
@@ -118,7 +119,7 @@ class InjectableConfigTest extends TestCase
         $serialized = serialize($config);
         $this->assertEquals($config, unserialize($serialized));
 
-        $this->assertEquals($config, InjectableConfig::__set_state([
+        $this->assertEquals($config, TestConfig::__set_state([
             'config' => [
                 'keyA' => 'value',
                 'keyB' => 'valueB',

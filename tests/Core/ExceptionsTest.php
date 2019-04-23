@@ -1,9 +1,11 @@
 <?php
 /**
- * Spiral, Core Components
+ * Spiral Framework.
  *
- * @author Wolfy-J
+ * @license   MIT
+ * @author    Anton Titov (Wolfy-J)
  */
+declare(strict_types=1);
 
 namespace Spiral\Core\Tests;
 
