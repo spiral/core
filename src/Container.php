@@ -181,7 +181,17 @@ final class Container implements
                 $class = $parameter->getClass();
             } catch (\Throwable $e) {
                 //Possibly invalid class definition or syntax error
-                throw new ContainerException($e->getMessage(), $e->getCode(), $e);
+                $location = $reflection->getName();
+                if ($reflection instanceof \ReflectionMethod) {
+                    $location = "{$reflection->getDeclaringClass()->getName()}->{$location}";
+                }
+
+                //Possibly invalid class definition or syntax error
+                throw new ContainerException(
+                    "Unable to resolve `{$parameter->getName()}` in {$location}: " . $e->getMessage(),
+                    $e->getCode(),
+                    $e
+                );
             }
 
             if (isset($parameters[$name]) && is_object($parameters[$name])) {
