@@ -143,10 +143,15 @@ final class Container implements
             return $this->make($binding, $parameters, $context);
         }
 
-        if ($binding[0] === $alias) {
-            $instance = $this->autowire($alias, $parameters, $context);
-        } else {
-            $instance = $this->evaluateBinding($alias, $binding[0], $parameters, $context);
+        unset($this->bindings[$alias]);
+        try {
+            if ($binding[0] === $alias) {
+                $instance = $this->autowire($alias, $parameters, $context);
+            } else {
+                $instance = $this->evaluateBinding($alias, $binding[0], $parameters, $context);
+            }
+        } finally {
+            $this->bindings[$alias] = $binding;
         }
 
         if ($binding[1]) {
@@ -433,7 +438,7 @@ final class Container implements
      * Register instance in container, might perform methods like auto-singletons, log populations
      * and etc. Can be extended.
      *
-     * @param object $instance   Created object.
+     * @param object $instance Created object.
      * @param array  $parameters Parameters which been passed with created instance.
      * @return object
      */
