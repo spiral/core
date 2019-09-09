@@ -43,7 +43,7 @@ final class ContainerScope
      */
     public static function runScope(ContainerInterface $container, callable $scope)
     {
-        list ($previous, self::$container) = [self::$container, $container];
+        list($previous, self::$container) = [self::$container, $container];
         try {
             return $scope();
         } catch (\Throwable $e) {

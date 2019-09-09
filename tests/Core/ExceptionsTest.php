@@ -71,6 +71,5 @@ class ExceptionsTest extends TestCase
 
     protected function invalidInjection(InvalidClass $class)
     {
-
     }
 }

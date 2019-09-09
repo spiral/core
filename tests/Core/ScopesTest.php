@@ -59,7 +59,6 @@ class ScopesTest extends TestCase
                 throw new RuntimeException("exception");
             }));
         } catch (\Throwable $e) {
-
         }
 
         $this->assertInstanceOf(RuntimeException::class, $e);
@@ -114,7 +113,6 @@ class ScopesTest extends TestCase
                 throw new RuntimeException("exception");
             }));
         } catch (\Throwable $e) {
-
         }
 
         $this->assertSame("a", $c->get("bucket")->getName());
