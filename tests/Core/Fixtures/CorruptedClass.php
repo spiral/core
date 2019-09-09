@@ -12,5 +12,5 @@ namespace Spiral\Core\Tests\Fixtures;
 
 class CorruptedClass
 {
-im broken;
+    im broken;
 }

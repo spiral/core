@@ -12,5 +12,4 @@ namespace Spiral\Core\Tests\Fixtures;
 
 abstract class BadClass
 {
-
 }

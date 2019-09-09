@@ -16,5 +16,4 @@ use Psr\Container\NotFoundExceptionInterface;
  */
 class NotFoundException extends AutowireException implements NotFoundExceptionInterface
 {
-
 }
