@@ -612,7 +612,7 @@ final class Container implements
         $value
     ) {
         if (is_null($value)) {
-            if (!$parameter->isOptional()  &&
+            if (!$parameter->isOptional() &&
                 !($parameter->isDefaultValueAvailable() && $parameter->getDefaultValue() === null)
             ) {
                 throw new ArgumentException($parameter, $context);
@@ -622,16 +622,19 @@ final class Container implements
         }
 
         $type = $parameter->getType();
+        if ($type === null) {
+            return;
+        }
 
-        if ($type == 'array' && !is_array($value)) {
+        if ($type->getName() == 'array' && !is_array($value)) {
             throw new ArgumentException($parameter, $context);
         }
 
-        if (($type == 'int' || $type == 'float') && !is_numeric($value)) {
+        if (($type->getName() == 'int' || $type->getName() == 'float') && !is_numeric($value)) {
             throw new ArgumentException($parameter, $context);
         }
 
-        if ($type == 'bool' && !is_bool($value) && !is_numeric($value)) {
+        if ($type->getName() == 'bool' && !is_bool($value) && !is_numeric($value)) {
             throw new ArgumentException($parameter, $context);
         }
     }
