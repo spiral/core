@@ -569,7 +569,6 @@ final class Container implements
      */
     private function getInjectorID(\ReflectionClass $reflection): ?string
     {
-        $injectorID = null;
         if (array_key_exists($reflection->getName(), $this->injectors)) {
             if ($this->injectors[$reflection->getName()] === null) {
                 // disabled state
@@ -580,12 +579,12 @@ final class Container implements
         }
 
         if ($reflection->hasConstant('INJECTOR')) {
-            $injectorID = $reflection->getConstant('INJECTOR');
+            $injector = $reflection->getConstant('INJECTOR');
 
             // lazy-init
-            if (!array_key_exists($injectorID, $this->injectors)) {
-                $this->injectors[$injectorID] = $injectorID;
-                return $injectorID;
+            if (!array_key_exists($injector, $this->injectors)) {
+                $this->injectors[$injector] = $injector;
+                return $injector;
             }
         }
 
