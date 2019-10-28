@@ -57,10 +57,9 @@ final class Container implements
         ScopeInterface::class     => self::class,
         ResolverInterface::class  => self::class
     ];
-
     /**
      * List of classes responsible for handling specific instance or interface. Provides ability to
-     * delegate container functionality. Binding must happen based on interface or class name.
+     * delegate container functionality.
      *
      * @internal
      * @var array
@@ -112,7 +111,6 @@ final class Container implements
         if ($alias instanceof Autowire) {
             return $alias->resolve($this);
         }
-
         //Direct bypass to construct, i might think about this option... or not.
         return $this->make($alias, [], $context);
     }
@@ -130,19 +128,15 @@ final class Container implements
             //No direct instructions how to construct class, make is automatically
             return $this->autowire($alias, $parameters, $context);
         }
-
         $binding = $this->bindings[$alias];
-
         if (is_object($binding)) {
             //When binding is instance, assuming singleton
             return $binding;
         }
-
         if (is_string($binding)) {
             //Binding is pointing to something else
             return $this->make($binding, $parameters, $context);
         }
-
         unset($this->bindings[$alias]);
         try {
             if ($binding[0] === $alias) {
@@ -153,12 +147,10 @@ final class Container implements
         } finally {
             $this->bindings[$alias] = $binding;
         }
-
         if ($binding[1]) {
             //Indicates singleton
             $this->bindings[$alias] = $instance;
         }
-
         return $instance;
     }
 
@@ -184,7 +176,6 @@ final class Container implements
                 if ($reflection instanceof \ReflectionMethod) {
                     $location = "{$reflection->getDeclaringClass()->getName()}->{$location}";
                 }
-
                 //Possibly invalid class definition or syntax error
                 throw new ContainerException(
                     "Unable to resolve `{$parameter->getName()}` in {$location}: " . $e->getMessage(),
@@ -192,7 +183,6 @@ final class Container implements
                     $e
                 );
             }
-
             if (isset($parameters[$name]) && is_object($parameters[$name])) {
                 if ($parameters[$name] instanceof Autowire) {
                     //Supplied by user as late dependency
@@ -203,7 +193,6 @@ final class Container implements
                 }
                 continue;
             }
-
             //No declared type or scalar type or array
             if (empty($class)) {
                 //Provided from outside
@@ -213,22 +202,17 @@ final class Container implements
                     $arguments[] = $parameters[$name];
                     continue;
                 }
-
                 if ($parameter->isDefaultValueAvailable()) {
                     //Default value
                     $arguments[] = $parameter->getDefaultValue();
-
                     continue;
                 }
-
                 //Unable to resolve scalar argument value
                 throw new ArgumentException($parameter, $reflection);
             }
-
             try {
                 //Requesting for contextual dependency
                 $arguments[] = $this->get($class->getName(), $name);
-
                 continue;
             } catch (AutowireException $e) {
                 if ($parameter->isOptional()) {
@@ -236,11 +220,9 @@ final class Container implements
                     $arguments[] = null;
                     continue;
                 }
-
                 throw $e;
             }
         }
-
         return $arguments;
     }
 
@@ -256,17 +238,14 @@ final class Container implements
             } else {
                 $cleanup[] = $alias;
             }
-
             $this->bind($alias, $resolver);
         }
-
         try {
             return $scope();
         } finally {
             foreach (array_reverse($previous) as $alias => $resolver) {
                 $this->bindings[$alias] = $resolver;
             }
-
             foreach ($cleanup as $alias) {
                 unset($this->bindings[$alias]);
             }
@@ -287,12 +266,9 @@ final class Container implements
         if (is_array($resolver) || $resolver instanceof \Closure || $resolver instanceof Autowire) {
             //Array means = execute me, false = not singleton
             $this->bindings[$alias] = [$resolver, false];
-
             return $this;
         }
-
         $this->bindings[$alias] = $resolver;
-
         return $this;
     }
 
@@ -309,12 +285,9 @@ final class Container implements
         if (is_object($resolver) && !$resolver instanceof \Closure && !$resolver instanceof Autowire) {
             //Direct binding to an instance
             $this->bindings[$alias] = $resolver;
-
             return $this;
         }
-
         $this->bindings[$alias] = [$resolver, true];
-
         return $this;
     }
 
@@ -332,10 +305,23 @@ final class Container implements
         if (!is_string($injector)) {
             throw new InvalidArgumentException('Injector can only be set as string binding');
         }
-
         $this->injectors[$class] = $injector;
-
         return $this;
+    }
+
+    /**
+     * Check if given class has associated injector.
+     *
+     * @param \ReflectionClass $reflection
+     * @return bool
+     */
+    public function hasInjector(\ReflectionClass $reflection): bool
+    {
+        if (isset($this->injectors[$reflection->getName()])) {
+            return true;
+        }
+        //Auto injection!
+        return $reflection->isSubclassOf(InjectableInterface::class);
     }
 
     /**
@@ -349,12 +335,10 @@ final class Container implements
         if (!$this->has($alias)) {
             return false;
         }
-
         while (isset($this->bindings[$alias]) && is_string($this->bindings[$alias])) {
             //Checking alias tree
             $alias = $this->bindings[$alias];
         }
-
         return isset($this->bindings[$alias]) && is_object($this->bindings[$alias]);
     }
 
@@ -410,10 +394,8 @@ final class Container implements
         if (!class_exists($class)) {
             throw new NotFoundException(sprintf("Undefined class or binding '%s'", $class));
         }
-
         //Automatically create instance
         $instance = $this->createInstance($class, $parameters, $context);
-
         //Apply registration functions to created instance
         return $this->registerInstance($instance, $parameters);
     }
@@ -431,14 +413,11 @@ final class Container implements
         //Declarative singletons (only when class received via direct get)
         if (empty($parameters) && $instance instanceof SingletonInterface) {
             $alias = get_class($instance);
-
             if (!isset($this->bindings[$alias])) {
                 $this->bindings[$alias] = $instance;
             }
         }
-
         //Your code can go here (for example LoggerAwareInterface, custom hydration and etc)
-
         return $instance;
     }
 
@@ -462,46 +441,37 @@ final class Container implements
             //Reference
             return $this->make($target, $parameters, $context);
         }
-
         if ($target instanceof Autowire) {
             return $target->resolve($this, $parameters);
         }
-
         if ($target instanceof \Closure) {
             try {
                 $reflection = new \ReflectionFunction($target);
             } catch (\ReflectionException $e) {
                 throw new ContainerException($e->getMessage(), $e->getCode(), $e);
             }
-
             //Invoking Closure with resolved arguments
             return $reflection->invokeArgs(
                 $this->resolveArguments($reflection, $parameters, $context)
             );
         }
-
         if (is_array($target) && isset($target[1])) {
             //In a form of resolver and method
             list($resolver, $method) = $target;
-
             //Resolver instance (i.e. [ClassName::class, 'method'])
             $resolver = $this->get($resolver);
-
             try {
                 $method = new \ReflectionMethod($resolver, $method);
             } catch (\ReflectionException $e) {
                 throw new ContainerException($e->getMessage(), $e->getCode(), $e);
             }
-
             $method->setAccessible(true);
-
             //Invoking factory method with resolved arguments
             return $method->invokeArgs(
                 $resolver,
                 $this->resolveArguments($method, $parameters, $context)
             );
         }
-
         throw new ContainerException(sprintf("Invalid binding for '%s'", $alias));
     }
 
@@ -522,25 +492,20 @@ final class Container implements
         } catch (\ReflectionException $e) {
             throw new ContainerException($e->getMessage(), $e->getCode(), $e);
         }
-
-        // We have to construct class using external injector when we know exact context
-        if ($parameters === [] && ($injectorID = $this->getInjectorID($reflection)) !== null) {
-            $instance = $this->createInjection($injectorID, $reflection, $context);
-
+        //We have to construct class using external injector when we know exact context
+        if (empty($parameters) && $this->hasInjector($reflection)) {
+            $instance = $this->getInjector($reflection)->createInjection($reflection, $context);
             if (!$reflection->isInstance($instance)) {
                 throw new InjectionException(sprintf(
                     "Invalid injection response for '%s'",
                     $reflection->getName()
                 ));
             }
-
             return $instance;
         }
-
         if (!$reflection->isInstantiable()) {
             throw new ContainerException(sprintf("Class '%s' can not be constructed", $class));
         }
-
         if (!empty($constructor = $reflection->getConstructor())) {
             //Using constructor with resolved arguments
             $instance = $reflection->newInstanceArgs(
@@ -550,7 +515,6 @@ final class Container implements
             //No constructor specified
             $instance = $reflection->newInstance();
         }
-
         return $instance;
     }
 
@@ -558,76 +522,25 @@ final class Container implements
      * Get injector associated with given class.
      *
      * @param \ReflectionClass $reflection
-     * @return array pair on injector name and instance
+     * @return InjectorInterface
      */
-
-    /**
-     * Returns injector name if any.
-     *
-     * @param \ReflectionClass $reflection
-     * @return string|null
-     */
-    private function getInjectorID(\ReflectionClass $reflection): ?string
+    private function getInjector(\ReflectionClass $reflection): InjectorInterface
     {
-        if (array_key_exists($reflection->getName(), $this->injectors)) {
-            if ($this->injectors[$reflection->getName()] === null) {
-                // disabled state
-                return null;
-            }
-
-            return $reflection->getName();
+        if (isset($this->injectors[$reflection->getName()])) {
+            //Stated directly
+            $injector = $this->get($this->injectors[$reflection->getName()]);
+        } else {
+            //Auto-injection!
+            $injector = $this->get($reflection->getConstant('INJECTOR'));
         }
-
-        if ($reflection->hasConstant('INJECTOR')) {
-            $injector = $reflection->getConstant('INJECTOR');
-
-            // lazy-init
-            if (!array_key_exists($injector, $this->injectors)) {
-                $this->injectors[$injector] = $injector;
-                return $injector;
-            }
+        if (!$injector instanceof InjectorInterface) {
+            throw new InjectionException(sprintf(
+                "Class '%s' must be an instance of InjectorInterface for '%s'",
+                get_class($injector),
+                $reflection->getName()
+            ));
         }
-
-        foreach ($this->injectors as $name => $injector) {
-            if (interface_exists($name) && $reflection->implementsInterface($name)) {
-                return $name;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * @param string           $injectorID
-     * @param \ReflectionClass $reflection
-     * @param string|null      $context
-     * @return object|null
-     */
-    private function createInjection(string $injectorID, \ReflectionClass $reflection, string $context = null)
-    {
-        $injector = $this->injectors[$injectorID];
-
-        if (is_string($injector)) {
-            $injector = $this->get($injector);
-            if (!$injector instanceof InjectorInterface) {
-                throw new InjectionException(sprintf(
-                    "Class '%s' must be an instance of InjectorInterface for '%s'",
-                    get_class($injector),
-                    $reflection->getName()
-                ));
-            }
-
-            // pre-heated
-            $this->injectors[$injectorID] = $injector;
-        }
-
-        // avoid cycling dependencies
-        $this->injectors[$injectorID] = null;
-        try {
-            return $injector->createInjection($reflection, $context);
-        } finally {
-            $this->injectors[$injectorID] = $injector;
-        }
+        return $injector;
     }
 
     /**
@@ -650,23 +563,18 @@ final class Container implements
             ) {
                 throw new ArgumentException($parameter, $context);
             }
-
             return;
         }
-
         $type = $parameter->getType();
         if ($type === null) {
             return;
         }
-
         if ($type->getName() == 'array' && !is_array($value)) {
             throw new ArgumentException($parameter, $context);
         }
-
         if (($type->getName() == 'int' || $type->getName() == 'float') && !is_numeric($value)) {
             throw new ArgumentException($parameter, $context);
         }
-
         if ($type->getName() == 'bool' && !is_bool($value) && !is_numeric($value)) {
             throw new ArgumentException($parameter, $context);
         }
