@@ -656,16 +656,19 @@ final class Container implements
         }
 
         $type = $parameter->getType();
+        if ($type === null) {
+            return;
+        }
 
-        if ($type == 'array' && !is_array($value)) {
+        if ($type->getName() == 'array' && !is_array($value)) {
             throw new ArgumentException($parameter, $context);
         }
 
-        if (($type == 'int' || $type == 'float') && !is_numeric($value)) {
+        if (($type->getName() == 'int' || $type->getName() == 'float') && !is_numeric($value)) {
             throw new ArgumentException($parameter, $context);
         }
 
-        if ($type == 'bool' && !is_bool($value) && !is_numeric($value)) {
+        if ($type->getName() == 'bool' && !is_bool($value) && !is_numeric($value)) {
             throw new ArgumentException($parameter, $context);
         }
     }
