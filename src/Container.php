@@ -60,7 +60,7 @@ final class Container implements
 
     /**
      * List of classes responsible for handling specific instance or interface. Provides ability to
-     * delegate container functionality.
+     * delegate container functionality. Binding must happen based on interface or class name.
      *
      * @internal
      * @var array
@@ -339,22 +339,6 @@ final class Container implements
     }
 
     /**
-     * Check if given class has associated injector.
-     *
-     * @param \ReflectionClass $reflection
-     * @return bool
-     */
-    public function hasInjector(\ReflectionClass $reflection): bool
-    {
-        if (isset($this->injectors[$reflection->getName()])) {
-            return true;
-        }
-
-        //Auto injection!
-        return $reflection->isSubclassOf(InjectableInterface::class);
-    }
-
-    /**
      * Check if alias points to constructed instance (singleton).
      *
      * @param string $alias
@@ -438,7 +422,7 @@ final class Container implements
      * Register instance in container, might perform methods like auto-singletons, log populations
      * and etc. Can be extended.
      *
-     * @param object $instance Created object.
+     * @param object $instance   Created object.
      * @param array  $parameters Parameters which been passed with created instance.
      * @return object
      */
@@ -539,9 +523,9 @@ final class Container implements
             throw new ContainerException($e->getMessage(), $e->getCode(), $e);
         }
 
-        //We have to construct class using external injector when we know exact context
-        if (empty($parameters) && $this->hasInjector($reflection)) {
-            $instance = $this->getInjector($reflection)->createInjection($reflection, $context);
+        // We have to construct class using external injector when we know exact context
+        if ($parameters === [] && ($injectorID = $this->getInjectorID($reflection)) !== null) {
+            $instance = $this->createInjection($injectorID, $reflection, $context);
 
             if (!$reflection->isInstance($instance)) {
                 throw new InjectionException(sprintf(
@@ -574,27 +558,77 @@ final class Container implements
      * Get injector associated with given class.
      *
      * @param \ReflectionClass $reflection
-     * @return InjectorInterface
+     * @return array pair on injector name and instance
      */
-    private function getInjector(\ReflectionClass $reflection): InjectorInterface
+
+    /**
+     * Returns injector name if any.
+     *
+     * @param \ReflectionClass $reflection
+     * @return string|null
+     */
+    private function getInjectorID(\ReflectionClass $reflection): ?string
     {
-        if (isset($this->injectors[$reflection->getName()])) {
-            //Stated directly
-            $injector = $this->get($this->injectors[$reflection->getName()]);
-        } else {
-            //Auto-injection!
-            $injector = $this->get($reflection->getConstant('INJECTOR'));
+        $injectorID = null;
+        if (array_key_exists($reflection->getName(), $this->injectors)) {
+            if ($this->injectors[$reflection->getName()] === null) {
+                // disabled state
+                return null;
+            }
+
+            return $reflection->getName();
         }
 
-        if (!$injector instanceof InjectorInterface) {
-            throw new InjectionException(sprintf(
-                "Class '%s' must be an instance of InjectorInterface for '%s'",
-                get_class($injector),
-                $reflection->getName()
-            ));
+        if ($reflection->hasConstant('INJECTOR')) {
+            $injectorID = $reflection->getConstant('INJECTOR');
+
+            // lazy-init
+            if (!array_key_exists($injectorID, $this->injectors)) {
+                $this->injectors[$injectorID] = $injectorID;
+                return $injectorID;
+            }
         }
 
-        return $injector;
+        foreach ($this->injectors as $name => $injector) {
+            if (interface_exists($name) && $reflection->implementsInterface($name)) {
+                return $name;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param string           $injectorID
+     * @param \ReflectionClass $reflection
+     * @param string|null      $context
+     * @return object|null
+     */
+    private function createInjection(string $injectorID, \ReflectionClass $reflection, string $context = null)
+    {
+        $injector = $this->injectors[$injectorID];
+
+        if (is_string($injector)) {
+            $injector = $this->get($injector);
+            if (!$injector instanceof InjectorInterface) {
+                throw new InjectionException(sprintf(
+                    "Class '%s' must be an instance of InjectorInterface for '%s'",
+                    get_class($injector),
+                    $reflection->getName()
+                ));
+            }
+
+            // pre-heated
+            $this->injectors[$injectorID] = $injector;
+        }
+
+        // avoid cycling dependencies
+        $this->injectors[$injectorID] = null;
+        try {
+            return $injector->createInjection($reflection, $context);
+        } finally {
+            $this->injectors[$injectorID] = $injector;
+        }
     }
 
     /**
@@ -612,7 +646,7 @@ final class Container implements
         $value
     ) {
         if (is_null($value)) {
-            if (!$parameter->isOptional()  &&
+            if (!$parameter->isOptional() &&
                 !($parameter->isDefaultValueAvailable() && $parameter->getDefaultValue() === null)
             ) {
                 throw new ArgumentException($parameter, $context);
