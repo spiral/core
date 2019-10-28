@@ -1,10 +1,12 @@
 <?php
+
 /**
  * Spiral Framework.
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 declare(strict_types=1);
 
 namespace Spiral\Core\Tests;
@@ -19,7 +21,7 @@ use Spiral\Core\Tests\Fixtures\SampleClass;
 
 class FactoryTest extends TestCase
 {
-    public function testAutoFactory()
+    public function testAutoFactory(): void
     {
         $container = new Container();
         $this->assertInstanceOf(FactoryInterface::class, $container);
@@ -34,7 +36,7 @@ class FactoryTest extends TestCase
         $this->assertSame('some data', $bucket->getData());
     }
 
-    public function testClosureFactory()
+    public function testClosureFactory(): void
     {
         $container = new Container();
         $this->assertInstanceOf(FactoryInterface::class, $container);
@@ -52,7 +54,7 @@ class FactoryTest extends TestCase
         $this->assertSame('some data', $bucket->getData());
     }
 
-    public function testMethodFactory()
+    public function testMethodFactory(): void
     {
         $container = new Container();
         $this->assertInstanceOf(FactoryInterface::class, $container);
@@ -68,7 +70,7 @@ class FactoryTest extends TestCase
         $this->assertSame('some data', $bucket->getData());
     }
 
-    public function testCascadeFactory()
+    public function testCascadeFactory(): void
     {
         $container = new Container();
         $this->assertInstanceOf(FactoryInterface::class, $container);
@@ -90,7 +92,7 @@ class FactoryTest extends TestCase
     /**
      * @expectedException \Spiral\Core\Exception\Container\ContainerException
      */
-    public function testConstructAbstract()
+    public function testConstructAbstract(): void
     {
         $container = new Container();
         $container->make(BadClass::class);
@@ -99,7 +101,7 @@ class FactoryTest extends TestCase
     /**
      * @expectedException \ParseError
      */
-    public function testConstructCorrupted()
+    public function testConstructCorrupted(): void
     {
         $container = new Container();
         $container->make(CorruptedClass::class);

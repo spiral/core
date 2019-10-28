@@ -1,10 +1,12 @@
 <?php
+
 /**
  * Spiral Framework.
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 declare(strict_types=1);
 
 namespace Spiral\Core\Tests;
@@ -16,14 +18,14 @@ use Spiral\Core\Tests\Fixtures\SampleClass;
 
 class SingletonsTest extends TestCase
 {
-    public function testSingletonInstance()
+    public function testSingletonInstance(): void
     {
         $container = new Container();
         $container->bindSingleton('sampleClass', $instance = new SampleClass());
         $this->assertSame($instance, $container->get('sampleClass'));
     }
 
-    public function testSingletonToItself()
+    public function testSingletonToItself(): void
     {
         $container = new Container();
         $container->bindSingleton(SampleClass::class, SampleClass::class);
@@ -33,7 +35,7 @@ class SingletonsTest extends TestCase
         $this->assertSame($sc, $container->get(SampleClass::class));
     }
 
-    public function testSingletonInstanceWithBinding()
+    public function testSingletonInstanceWithBinding(): void
     {
         $container = new Container();
         $container->bindSingleton('sampleClass', $instance = new SampleClass());
@@ -43,7 +45,7 @@ class SingletonsTest extends TestCase
         $this->assertSame($instance, $container->get('binding'));
     }
 
-    public function testHasInstance()
+    public function testHasInstance(): void
     {
         $container = new Container();
         $container->bindSingleton('sampleClass', $instance = new SampleClass());
@@ -52,7 +54,7 @@ class SingletonsTest extends TestCase
         $this->assertFalse($container->hasInstance('otherClass'));
     }
 
-    public function testSingletonClosure()
+    public function testSingletonClosure(): void
     {
         $container = new Container();
 
@@ -65,7 +67,7 @@ class SingletonsTest extends TestCase
         $this->assertSame($instance, $container->get('sampleClass'));
     }
 
-    public function testSingletonClosureTwice()
+    public function testSingletonClosureTwice(): void
     {
         $container = new Container();
 
@@ -79,7 +81,7 @@ class SingletonsTest extends TestCase
         $this->assertSame($instance, $container->get('sampleClass'));
     }
 
-    public function testSingletonFactory()
+    public function testSingletonFactory(): void
     {
         $container = new Container();
 
@@ -91,7 +93,7 @@ class SingletonsTest extends TestCase
         $this->assertSame($instance, $container->get('sampleClass'));
     }
 
-    public function testDelayedSingleton()
+    public function testDelayedSingleton(): void
     {
         $container = new Container();
         $container->bindSingleton('singleton', 'sampleClass');
@@ -107,7 +109,7 @@ class SingletonsTest extends TestCase
         $this->assertNotSame($instance, $container->get('sampleClass'));
     }
 
-    public function testDeclarativeSingleton()
+    public function testDeclarativeSingleton(): void
     {
         $container = new Container();
 

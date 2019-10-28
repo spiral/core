@@ -1,10 +1,12 @@
 <?php
+
 /**
  * Spiral Framework.
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 declare(strict_types=1);
 
 namespace Spiral\Core\Tests;
@@ -19,18 +21,18 @@ class SaturateTest extends TestCase
 {
     use SaturateTrait;
 
-    public function testSaturate()
+    public function testSaturate(): void
     {
         $value = $this->saturate(new TestConfig(), TestConfig::class);
         $this->assertInstanceOf(TestConfig::class, $value);
     }
 
-    public function testSaturateFromContainer()
+    public function testSaturateFromContainer(): void
     {
         $c = new Container();
         $c->bind(TestConfig::class, new TestConfig());
 
-        ContainerScope::runScope($c, function () {
+        ContainerScope::runScope($c, function (): void {
             $value = $this->saturate(null, TestConfig::class);
             $this->assertInstanceOf(TestConfig::class, $value);
         });
@@ -39,7 +41,7 @@ class SaturateTest extends TestCase
     /**
      * @expectedException \Spiral\Core\Exception\ScopeException
      */
-    public function testSaturateException()
+    public function testSaturateException(): void
     {
         $value = $this->saturate(null, TestConfig::class);
     }
@@ -47,9 +49,9 @@ class SaturateTest extends TestCase
     /**
      * @expectedException \Spiral\Core\Exception\ScopeException
      */
-    public function testSaturateExceptionBinding()
+    public function testSaturateExceptionBinding(): void
     {
-        ContainerScope::runScope(new Container(), function () {
+        ContainerScope::runScope(new Container(), function (): void {
             $value = $this->saturate(null, TestConfig::class);
             $this->assertInstanceOf(TestConfig::class, $value);
         });

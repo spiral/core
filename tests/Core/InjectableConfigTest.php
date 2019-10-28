@@ -1,10 +1,12 @@
 <?php
+
 /**
  * Spiral Framework.
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 declare(strict_types=1);
 
 namespace Spiral\Core\Tests;
@@ -25,7 +27,7 @@ class InjectableConfigTest extends TestCase
         ]
     ];
 
-    public function testArrayAccess()
+    public function testArrayAccess(): void
     {
         $config = new TestConfig([
             'key' => 'value',
@@ -37,7 +39,7 @@ class InjectableConfigTest extends TestCase
         $this->assertArrayNotHasKey('otherKey', $config);
     }
 
-    public function testToArray()
+    public function testToArray(): void
     {
         $config = new TestConfig([
             'keyA' => 'value',
@@ -50,7 +52,7 @@ class InjectableConfigTest extends TestCase
         ], $config->toArray());
     }
 
-    public function testIteration()
+    public function testIteration(): void
     {
         $config = new TestConfig([
             'keyA' => 'value',
@@ -67,7 +69,7 @@ class InjectableConfigTest extends TestCase
      * @expectedExceptionMessage Unable to change configuration data, configs are treated as
      *                           immutable by default
      */
-    public function testWriteError()
+    public function testWriteError(): void
     {
         $config = new TestConfig([
             'keyA' => 'value',
@@ -82,7 +84,7 @@ class InjectableConfigTest extends TestCase
      * @expectedExceptionMessage Unable to change configuration data, configs are treated as
      *                           immutable by default
      */
-    public function testUnsetError()
+    public function testUnsetError(): void
     {
         $config = new TestConfig([
             'keyA' => 'value',
@@ -96,7 +98,7 @@ class InjectableConfigTest extends TestCase
      * @expectedException \Spiral\Core\Exception\ConfigException
      * @expectedExceptionMessage Undefined configuration key 'keyC'
      */
-    public function testGetError()
+    public function testGetError(): void
     {
         $config = new TestConfig([
             'keyA' => 'value',
@@ -109,7 +111,7 @@ class InjectableConfigTest extends TestCase
     /**
      * @covers \Spiral\Core\InjectableConfig::__set_state()
      */
-    public function testSerialize()
+    public function testSerialize(): void
     {
         $config = new TestConfig([
             'keyA' => 'value',
@@ -127,7 +129,7 @@ class InjectableConfigTest extends TestCase
         ]));
     }
 
-    public function testAliases()
+    public function testAliases(): void
     {
         $this->assertEquals('test', $this->resolveAlias('default'));
         $this->assertEquals('test', $this->resolveAlias('value'));

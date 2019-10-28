@@ -1,10 +1,12 @@
 <?php
+
 /**
  * Spiral Framework.
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 declare(strict_types=1);
 
 namespace Spiral\Tests\Core;
@@ -23,7 +25,7 @@ class InjectableTest extends TestCase
      * @expectedException \Spiral\Core\Exception\Container\AutowireException
      * @expectedExceptionMessage Undefined class or binding 'Spiral\Core\ConfigsInterface'
      */
-    public function testMissingInjector()
+    public function testMissingInjector(): void
     {
         $container = new Container();
         $container->get(TestConfig::class);
@@ -35,7 +37,7 @@ class InjectableTest extends TestCase
      *                           instance of InjectorInterface for
      *                           'Spiral\Core\Tests\Fixtures\TestConfig'
      */
-    public function testInvalidInjector()
+    public function testInvalidInjector(): void
     {
         $container = new Container();
 
@@ -47,7 +49,7 @@ class InjectableTest extends TestCase
      * @expectedException \Spiral\Core\Exception\Container\AutowireException
      * @expectedExceptionMessage Undefined class or binding 'invalid-injector'
      */
-    public function testInvalidInjectorBinding()
+    public function testInvalidInjectorBinding(): void
     {
         $container = new Container();
 
@@ -61,7 +63,7 @@ class InjectableTest extends TestCase
      *                           instance of InjectorInterface for
      *                           'Spiral\Core\Tests\Fixtures\TestConfig'
      */
-    public function testInvalidRuntimeInjector()
+    public function testInvalidRuntimeInjector(): void
     {
         $container = new Container();
 
@@ -71,20 +73,7 @@ class InjectableTest extends TestCase
         $container->get(TestConfig::class);
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage Injector can only be set as string binding
-     */
-    public function testInvalidInjectorArgument()
-    {
-        $container = new Container();
-
-        $container->bindInjector(TestConfig::class, new InvalidInjector());
-
-        $container->get(TestConfig::class);
-    }
-
-    public function testGetInjectors()
+    public function testGetInjectors(): void
     {
         $container = new Container();
 
@@ -106,7 +95,7 @@ class InjectableTest extends TestCase
      * @expectedException \Spiral\Core\Exception\Container\AutowireException
      * @expectedExceptionMessage Undefined class or binding 'invalid-configurator'
      */
-    public function testInjectorOuterBinding()
+    public function testInjectorOuterBinding(): void
     {
         $container = new Container();
         $container->bind(ConfigsInterface::class, 'invalid-configurator');
@@ -119,7 +108,7 @@ class InjectableTest extends TestCase
      * @expectedExceptionMessage Invalid injection response for
      *                           'Spiral\Core\Tests\Fixtures\TestConfig'
      */
-    public function testInvalidInjection()
+    public function testInvalidInjection(): void
     {
         $container = new Container();
 
@@ -131,7 +120,7 @@ class InjectableTest extends TestCase
         $container->get(TestConfig::class);
     }
 
-    public function testInjector()
+    public function testInjector(): void
     {
         $configurator = m::mock(ConfigsInterface::class);
         $expected = new TestConfig();
@@ -149,7 +138,7 @@ class InjectableTest extends TestCase
         $this->assertSame($expected, $container->get(TestConfig::class));
     }
 
-    public function testInjectorWithContext()
+    public function testInjectorWithContext(): void
     {
         $configurator = m::mock(ConfigsInterface::class);
         $expected = new TestConfig();
@@ -167,7 +156,7 @@ class InjectableTest extends TestCase
         $this->assertSame($expected, $container->get(TestConfig::class, 'context'));
     }
 
-    public function testInjectorForMethod()
+    public function testInjectorForMethod(): void
     {
         $configurator = m::mock(ConfigsInterface::class);
         $expected = new TestConfig();
@@ -191,7 +180,7 @@ class InjectableTest extends TestCase
     /**
      * @param TestConfig $contextArgument
      */
-    private function methodInjection(TestConfig $contextArgument)
+    private function methodInjection(TestConfig $contextArgument): void
     {
     }
 }

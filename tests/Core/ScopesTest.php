@@ -1,10 +1,12 @@
 <?php
+
 /**
  * Spiral Framework.
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 declare(strict_types=1);
 
 namespace Spiral\Core\Tests;
@@ -22,7 +24,7 @@ class ScopesTest extends TestCase
 {
     use ScopeTrait;
 
-    public function testScope()
+    public function testScope(): void
     {
         $container = $this->createMock(ContainerInterface::class);
 
@@ -35,7 +37,7 @@ class ScopesTest extends TestCase
         $this->assertNull(ContainerScope::getContainer());
     }
 
-    public function testScopeTrait()
+    public function testScopeTrait(): void
     {
         $container = $this->createMock(ContainerInterface::class);
 
@@ -48,15 +50,15 @@ class ScopesTest extends TestCase
         $this->assertNull(ContainerScope::getContainer());
     }
 
-    public function testScopeException()
+    public function testScopeException(): void
     {
         $container = $this->createMock(ContainerInterface::class);
 
         $this->assertNull(ContainerScope::getContainer());
 
         try {
-            $this->assertTrue(ContainerScope::runScope($container, function () use ($container) {
-                throw new RuntimeException("exception");
+            $this->assertTrue(ContainerScope::runScope($container, function () use ($container): void {
+                throw new RuntimeException('exception');
             }));
         } catch (\Throwable $e) {
         }
@@ -65,57 +67,57 @@ class ScopesTest extends TestCase
         $this->assertNull(ContainerScope::getContainer());
     }
 
-    public function testContainerScope()
+    public function testContainerScope(): void
     {
         $c = new Container();
-        $c->bind('bucket', new Bucket("a"));
+        $c->bind('bucket', new Bucket('a'));
 
-        $this->assertSame("a", $c->get("bucket")->getName());
-        $this->assertFalse($c->has("other"));
+        $this->assertSame('a', $c->get('bucket')->getName());
+        $this->assertFalse($c->has('other'));
 
         $this->assertTrue($c->runScope([
             'bucket' => new Bucket('b'),
             'other'  => new SampleClass()
         ], function () use ($c) {
-            $this->assertSame("b", $c->get("bucket")->getName());
-            $this->assertTrue($c->has("other"));
+            $this->assertSame('b', $c->get('bucket')->getName());
+            $this->assertTrue($c->has('other'));
 
-            return $c->get('bucket')->getName() == "b" && $c->has("other");
+            return $c->get('bucket')->getName() == 'b' && $c->has('other');
         }));
 
-        $this->assertSame("a", $c->get("bucket")->getName());
-        $this->assertFalse($c->has("other"));
+        $this->assertSame('a', $c->get('bucket')->getName());
+        $this->assertFalse($c->has('other'));
     }
 
-    public function testContainerScopeException()
+    public function testContainerScopeException(): void
     {
         $c = new Container();
-        $c->bind('bucket', new Bucket("a"));
+        $c->bind('bucket', new Bucket('a'));
 
-        $this->assertSame("a", $c->get("bucket")->getName());
-        $this->assertFalse($c->has("other"));
+        $this->assertSame('a', $c->get('bucket')->getName());
+        $this->assertFalse($c->has('other'));
 
         $this->assertTrue($c->runScope([
             'bucket' => new Bucket('b'),
             'other'  => new SampleClass()
         ], function () use ($c) {
-            $this->assertSame("b", $c->get("bucket")->getName());
-            $this->assertTrue($c->has("other"));
+            $this->assertSame('b', $c->get('bucket')->getName());
+            $this->assertTrue($c->has('other'));
 
-            return $c->get('bucket')->getName() == "b" && $c->has("other");
+            return $c->get('bucket')->getName() == 'b' && $c->has('other');
         }));
 
         try {
             $this->assertTrue($c->runScope([
                 'bucket' => new Bucket('b'),
                 'other'  => new SampleClass()
-            ], function () use ($c) {
-                throw new RuntimeException("exception");
+            ], function () use ($c): void {
+                throw new RuntimeException('exception');
             }));
         } catch (\Throwable $e) {
         }
 
-        $this->assertSame("a", $c->get("bucket")->getName());
-        $this->assertFalse($c->has("other"));
+        $this->assertSame('a', $c->get('bucket')->getName());
+        $this->assertFalse($c->has('other'));
     }
 }

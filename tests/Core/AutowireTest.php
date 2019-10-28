@@ -1,10 +1,12 @@
 <?php
+
 /**
  * Spiral Framework.
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 declare(strict_types=1);
 
 namespace Spiral\Tests\Core;
@@ -23,7 +25,7 @@ use Spiral\Core\Tests\Fixtures\TypedClass;
  */
 class AutowireTest extends TestCase
 {
-    public function testSimple()
+    public function testSimple(): void
     {
         $container = new Container();
 
@@ -31,7 +33,7 @@ class AutowireTest extends TestCase
         $this->assertInstanceOf(SampleClass::class, $container->make(SampleClass::class, []));
     }
 
-    public function testGet()
+    public function testGet(): void
     {
         $container = new Container();
 
@@ -39,7 +41,7 @@ class AutowireTest extends TestCase
         $this->assertInstanceOf(ExtendedSample::class, $container->get(SampleClass::class));
     }
 
-    public function testMake()
+    public function testMake(): void
     {
         $container = new Container();
 
@@ -52,14 +54,14 @@ class AutowireTest extends TestCase
      * @expectedExceptionMessage Unable to resolve 'name' argument in
      *                           'Spiral\Tests\Fixtures\Bucket::__construct'
      */
-    public function testArgumentException()
+    public function testArgumentException(): void
     {
         $container = new Container();
 
         $bucket = $container->get(Bucket::class);
     }
 
-    public function testDefaultValue()
+    public function testDefaultValue(): void
     {
         $container = new Container();
 
@@ -70,7 +72,7 @@ class AutowireTest extends TestCase
         $this->assertSame('default-data', $bucket->getData());
     }
 
-    public function testCascade()
+    public function testCascade(): void
     {
         $container = new Container();
 
@@ -83,7 +85,7 @@ class AutowireTest extends TestCase
         $this->assertInstanceOf(SampleClass::class, $object->getSample());
     }
 
-    public function testRemoveBinding()
+    public function testRemoveBinding(): void
     {
         $container = new Container();
 
@@ -103,7 +105,7 @@ class AutowireTest extends TestCase
         $this->assertFalse($container->hasInstance('alias-b'));
     }
 
-    public function testCascadeFollowBindings()
+    public function testCascadeFollowBindings(): void
     {
         $container = new Container();
 
@@ -122,7 +124,7 @@ class AutowireTest extends TestCase
      * @expectedException \Spiral\Core\Exception\Container\NotFoundException
      * @expectedExceptionMessage Undefined class or binding 'WrongClass'
      */
-    public function testAutowireException()
+    public function testAutowireException(): void
     {
         $container = new Container();
 
@@ -136,7 +138,7 @@ class AutowireTest extends TestCase
      * See line 218 in Container, this behaviour allows system to pass on classes which can not be
      * automatically constructured or missing but ONLY when default value is set to NULL.
      */
-    public function testAutowireWithDefaultOnWrongClass()
+    public function testAutowireWithDefaultOnWrongClass(): void
     {
         $container = new Container();
 
@@ -151,7 +153,7 @@ class AutowireTest extends TestCase
         $this->assertNull($object->getSample());
     }
 
-    public function testAutowireTypecastingAndValidating()
+    public function testAutowireTypecastingAndValidating(): void
     {
         $container = new Container();
 
@@ -192,7 +194,7 @@ class AutowireTest extends TestCase
      * @expectedExceptionMessage  Unable to resolve 'string' argument in
      *                            'Spiral\Tests\Core\Fixtures\TypedClass::__construct'
      */
-    public function testAutowireTypecastingAndValidatingWrongString()
+    public function testAutowireTypecastingAndValidatingWrongString(): void
     {
         $container = new Container();
 
@@ -211,7 +213,7 @@ class AutowireTest extends TestCase
      * @expectedExceptionMessage  Unable to resolve 'int' argument in
      *                            'Spiral\Tests\Core\Fixtures\TypedClass::__construct'
      */
-    public function testAutowireTypecastingAndValidatingWrongInt()
+    public function testAutowireTypecastingAndValidatingWrongInt(): void
     {
         $container = new Container();
 
@@ -230,7 +232,7 @@ class AutowireTest extends TestCase
      * @expectedExceptionMessage  Unable to resolve 'float' argument in
      *                            'Spiral\Tests\Core\Fixtures\TypedClass::__construct'
      */
-    public function testAutowireTypecastingAndValidatingWrongFloat()
+    public function testAutowireTypecastingAndValidatingWrongFloat(): void
     {
         $container = new Container();
 
@@ -249,7 +251,7 @@ class AutowireTest extends TestCase
      * @expectedExceptionMessage  Unable to resolve 'bool' argument in
      *                            'Spiral\Tests\Core\Fixtures\TypedClass::__construct'
      */
-    public function testAutowireTypecastingAndValidatingWrongBool()
+    public function testAutowireTypecastingAndValidatingWrongBool(): void
     {
         $container = new Container();
 
@@ -268,7 +270,7 @@ class AutowireTest extends TestCase
      * @expectedExceptionMessage  Unable to resolve 'array' argument in
      *                            'Spiral\Tests\Core\Fixtures\TypedClass::__construct'
      */
-    public function testAutowireTypecastingAndValidatingWrongArray()
+    public function testAutowireTypecastingAndValidatingWrongArray(): void
     {
         $container = new Container();
 
@@ -283,7 +285,7 @@ class AutowireTest extends TestCase
         $this->assertInstanceOf(TypedClass::class, $object);
     }
 
-    public function testAutowireOptionalArray()
+    public function testAutowireOptionalArray(): void
     {
         $container = new Container();
 
@@ -297,7 +299,7 @@ class AutowireTest extends TestCase
         $this->assertInstanceOf(TypedClass::class, $object);
     }
 
-    public function testAutowireOptionalString()
+    public function testAutowireOptionalString(): void
     {
         $container = new Container();
 
@@ -312,7 +314,7 @@ class AutowireTest extends TestCase
         $this->assertInstanceOf(TypedClass::class, $object);
     }
 
-    public function testAutowireDelegate()
+    public function testAutowireDelegate(): void
     {
         $container = new Container();
 
@@ -326,7 +328,7 @@ class AutowireTest extends TestCase
         $this->assertSame($s, $object->getSample());
     }
 
-    public function testSerializeAutowire()
+    public function testSerializeAutowire(): void
     {
         $wire = new Container\Autowire('sample-binding', ['a' => new Container\Autowire('b')]);
 
@@ -335,7 +337,7 @@ class AutowireTest extends TestCase
         $this->assertEquals($wire, $wireb);
     }
 
-    public function testBingToAutowire()
+    public function testBingToAutowire(): void
     {
         $container = new Container();
         $container->bind('abc', new Container\Autowire(SoftDependedClass::class, [
@@ -350,7 +352,7 @@ class AutowireTest extends TestCase
         $this->assertSame('Fixed', $abc->getName());
     }
 
-    public function testGetAutowire()
+    public function testGetAutowire(): void
     {
         $container = new Container();
 
@@ -364,7 +366,7 @@ class AutowireTest extends TestCase
         $this->assertSame('Fixed', $abc->getName());
     }
 
-    public function testBingToAutowireWithParameters()
+    public function testBingToAutowireWithParameters(): void
     {
         $container = new Container();
         $container->bind('abc', new Container\Autowire(SoftDependedClass::class, [
@@ -379,7 +381,7 @@ class AutowireTest extends TestCase
         $this->assertSame('Overwritten', $abc->getName());
     }
 
-    public function testSerialize()
+    public function testSerialize(): void
     {
         $a = new Container\Autowire(SoftDependedClass::class, [
             'name' => 'Fixed'

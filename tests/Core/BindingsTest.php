@@ -1,10 +1,12 @@
 <?php
+
 /**
  * Spiral Framework.
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 declare(strict_types=1);
 
 namespace Spiral\Core\Tests;
@@ -16,7 +18,7 @@ use Spiral\Core\Tests\Fixtures\SampleClass;
 
 class BindingsTest extends TestCase
 {
-    public function testBasicBinding()
+    public function testBasicBinding(): void
     {
         $container = new Container();
         $this->assertInstanceOf(ContainerInterface::class, $container);
@@ -31,7 +33,7 @@ class BindingsTest extends TestCase
         $this->assertEquals('hello', $container->get('abc'));
     }
 
-    public function testStringBinding()
+    public function testStringBinding(): void
     {
         $container = new Container();
 
@@ -47,7 +49,7 @@ class BindingsTest extends TestCase
         $this->assertEquals($container->get('abc'), $container->get('dce'));
     }
 
-    public function testClassBinding()
+    public function testClassBinding(): void
     {
         $container = new Container();
 
@@ -58,7 +60,7 @@ class BindingsTest extends TestCase
         $this->assertInstanceOf(SampleClass::class, $container->get('sampleClass'));
     }
 
-    public function testFactoryBinding()
+    public function testFactoryBinding(): void
     {
         $container = new Container();
 
@@ -66,7 +68,7 @@ class BindingsTest extends TestCase
         $this->assertInstanceOf(SampleClass::class, $container->get('sampleClass'));
     }
 
-    public function testInstanceBinding()
+    public function testInstanceBinding(): void
     {
         $container = new Container();
 

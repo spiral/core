@@ -1,10 +1,12 @@
 <?php
+
 /**
  * Spiral Framework.
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 declare(strict_types=1);
 
 namespace Spiral\Core\Container;
@@ -37,6 +39,15 @@ final class Autowire
     }
 
     /**
+     * @param $an_array
+     * @return static
+     */
+    public static function __set_state($an_array)
+    {
+        return new static($an_array['alias'], $an_array['parameters']);
+    }
+
+    /**
      * @param FactoryInterface $factory
      * @param array            $parameters Context specific parameters (always prior to declared ones).
      * @return mixed
@@ -47,14 +58,5 @@ final class Autowire
     public function resolve(FactoryInterface $factory, array $parameters = [])
     {
         return $factory->make($this->alias, $parameters + $this->parameters);
-    }
-
-    /**
-     * @param $an_array
-     * @return static
-     */
-    public static function __set_state($an_array)
-    {
-        return new static($an_array['alias'], $an_array['parameters']);
     }
 }

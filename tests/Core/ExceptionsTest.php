@@ -1,10 +1,12 @@
 <?php
+
 /**
  * Spiral Framework.
  *
  * @license   MIT
  * @author    Anton Titov (Wolfy-J)
  */
+
 declare(strict_types=1);
 
 namespace Spiral\Core\Tests;
@@ -24,7 +26,7 @@ class ExceptionsTest extends TestCase
      * @expectedException \Spiral\Core\Exception\Container\ContainerException
      * @expectedExceptionMessage Invalid binding for 'invalid'
      */
-    public function testInvalidBinding()
+    public function testInvalidBinding(): void
     {
         $container = new Container();
         $container->bind('invalid', ['invalid']);
@@ -34,7 +36,7 @@ class ExceptionsTest extends TestCase
     /**
      * @expectedException LogicException
      */
-    public function testClone()
+    public function testClone(): void
     {
         $container = new Container();
         clone $container;
@@ -44,14 +46,14 @@ class ExceptionsTest extends TestCase
      * @expectedException \Spiral\Core\Exception\Container\ContainerException
      * @expectedExceptionMessage Class Spiral\Core\Tests\InvalidClass does not exist
      */
-    public function testInvalidInjectionParameter()
+    public function testInvalidInjectionParameter(): void
     {
         $container = new Container();
 
         $container->resolveArguments(new \ReflectionMethod($this, 'invalidInjection'));
     }
 
-    public function testArgumentException(string $param = null)
+    public function testArgumentException(string $param = null): void
     {
         $method = new \ReflectionMethod($this, 'testArgumentException');
 
@@ -69,7 +71,7 @@ class ExceptionsTest extends TestCase
         $this->assertSame('param', $e->getParameter()->getName());
     }
 
-    protected function invalidInjection(InvalidClass $class)
+    protected function invalidInjection(InvalidClass $class): void
     {
     }
 }
