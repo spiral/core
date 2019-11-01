@@ -71,6 +71,7 @@ final class Container implements
     /**
      * Contains names of all classes which were checked for the available injectors.
      *
+     * @internal
      * @var array
      */
     private $injectorsCache = [];
