@@ -71,7 +71,6 @@ final class Container implements
     /**
      * Contains names of all classes which were checked for the available injectors.
      *
-     * @internal
      * @var array
      */
     private $injectorsCache = [];
@@ -579,8 +578,8 @@ final class Container implements
     private function checkInjector(\ReflectionClass $reflection): bool
     {
         $class = $reflection->getName();
-        if (isset($this->injectors[$class])) {
-            return true;
+        if (array_key_exists($class, $this->injectors)) {
+            return $this->injectors[$class] !== null;
         }
 
         if (
@@ -592,7 +591,7 @@ final class Container implements
         }
 
         if (!isset($this->injectorsCache[$class])) {
-            $this->injectorsCache[$class] = true;
+            $this->injectorsCache[$class] = null;
 
             // check interfaces
             foreach ($this->injectors as $target => $injector) {
