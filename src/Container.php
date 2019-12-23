@@ -268,6 +268,10 @@ final class Container implements
         }
 
         try {
+            if (ContainerScope::getContainer() !== $this) {
+                return ContainerScope::runScope($this, $scope);
+            }
+
             return $scope();
         } finally {
             foreach (array_reverse($previous) as $alias => $resolver) {
@@ -423,7 +427,7 @@ final class Container implements
      * Register instance in container, might perform methods like auto-singletons, log populations
      * and etc. Can be extended.
      *
-     * @param object $instance   Created object.
+     * @param object $instance Created object.
      * @param array  $parameters Parameters which been passed with created instance.
      * @return object
      */

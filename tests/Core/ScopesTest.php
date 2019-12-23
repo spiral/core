@@ -22,8 +22,6 @@ use Spiral\Core\Traits\ScopeTrait;
 
 class ScopesTest extends TestCase
 {
-    use ScopeTrait;
-
     public function testScope(): void
     {
         $container = $this->createMock(ContainerInterface::class);
@@ -32,19 +30,6 @@ class ScopesTest extends TestCase
 
         $this->assertTrue(ContainerScope::runScope($container, function () use ($container) {
             return $container === ContainerScope::getContainer();
-        }));
-
-        $this->assertNull(ContainerScope::getContainer());
-    }
-
-    public function testScopeTrait(): void
-    {
-        $container = $this->createMock(ContainerInterface::class);
-
-        $this->assertNull(ContainerScope::getContainer());
-
-        $this->assertTrue(ContainerScope::runScope($container, function () {
-            return $this->iocContainer() === ContainerScope::getContainer();
         }));
 
         $this->assertNull(ContainerScope::getContainer());
