@@ -11,6 +11,10 @@ declare(strict_types=1);
 
 namespace Spiral\Core\Exception\Container;
 
+use ReflectionFunctionAbstract;
+use ReflectionMethod;
+use ReflectionParameter;
+
 /**
  * Unable to resolve argument value.
  */
@@ -19,28 +23,28 @@ class ArgumentException extends AutowireException
     /**
      * Parameter caused error.
      *
-     * @var \ReflectionParameter
+     * @var ReflectionParameter
      */
-    protected $parameter = null;
+    protected $parameter;
 
     /**
      * Context method or constructor or function.
      *
-     * @var \ReflectionFunctionAbstract
+     * @var ReflectionFunctionAbstract
      */
-    protected $context = null;
+    protected $context;
 
     /**
-     * @param \ReflectionParameter        $parameter
-     * @param \ReflectionFunctionAbstract $context
+     * @param ReflectionParameter        $parameter
+     * @param ReflectionFunctionAbstract $context
      */
-    public function __construct(\ReflectionParameter $parameter, \ReflectionFunctionAbstract $context)
+    public function __construct(ReflectionParameter $parameter, ReflectionFunctionAbstract $context)
     {
         $this->parameter = $parameter;
         $this->context = $context;
 
         $name = $context->getName();
-        if ($context instanceof \ReflectionMethod) {
+        if ($context instanceof ReflectionMethod) {
             $name = $context->class . '::' . $name;
         }
 
@@ -48,17 +52,17 @@ class ArgumentException extends AutowireException
     }
 
     /**
-     * @return \ReflectionParameter
+     * @return ReflectionParameter
      */
-    public function getParameter(): \ReflectionParameter
+    public function getParameter(): ReflectionParameter
     {
         return $this->parameter;
     }
 
     /**
-     * @return \ReflectionFunctionAbstract
+     * @return ReflectionFunctionAbstract
      */
-    public function getContext(): \ReflectionFunctionAbstract
+    public function getContext(): ReflectionFunctionAbstract
     {
         return $this->context;
     }

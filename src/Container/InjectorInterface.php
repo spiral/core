@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace Spiral\Core\Container;
 
+use ReflectionClass;
 use Spiral\Core\Exception\Container\ContainerException;
 
 /**
@@ -28,11 +29,11 @@ interface InjectorInterface
      * Parameter reflection can be used for dynamic class constructing, for example it can define
      * database name or config section to be used to construct requested instance.
      *
-     * @param \ReflectionClass $class   Request class type.
-     * @param string           $context Parameter or alias name.
+     * @param ReflectionClass $class   Request class type.
+     * @param string          $context Parameter or alias name.
      * @return object
      *
      * @throws ContainerException
      */
-    public function createInjection(\ReflectionClass $class, string $context = null);
+    public function createInjection(ReflectionClass $class, string $context = null);
 }

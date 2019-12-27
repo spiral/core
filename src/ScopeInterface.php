@@ -11,6 +11,8 @@ declare(strict_types=1);
 
 namespace Spiral\Core;
 
+use Throwable;
+
 /**
  * Provides ability to run code withing isolated IoC scope.
  */
@@ -29,7 +31,7 @@ interface ScopeInterface
      * @param callable $scope
      * @return mixed
      *
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function runScope(array $bindings, callable $scope);
 }

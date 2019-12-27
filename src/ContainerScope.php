@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace Spiral\Core;
 
 use Psr\Container\ContainerInterface;
+use Throwable;
 
 /**
  * Scope class provides ability to enable or disable global container access within specific access scope.
@@ -20,9 +21,7 @@ use Psr\Container\ContainerInterface;
  */
 final class ContainerScope
 {
-    /**
-     * @var ContainerInterface
-     */
+    /** @var ContainerInterface */
     private static $container;
 
     /**
@@ -41,14 +40,15 @@ final class ContainerScope
      * @param ContainerInterface $container
      * @param callable           $scope
      * @return mixed
-     * @throws \Throwable
+     * @throws Throwable
      */
     public static function runScope(ContainerInterface $container, callable $scope)
     {
-        list($previous, self::$container) = [self::$container, $container];
+        [$previous, self::$container] = [self::$container, $container];
+
         try {
             return $scope();
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             throw $e;
         } finally {
             self::$container = $previous;

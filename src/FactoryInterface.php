@@ -16,9 +16,6 @@ use Spiral\Core\Exception\Container\AutowireException;
 
 /**
  * Declares ability to construct classes.
- *
- * @attention At this moment construct method has been splited from ContainerInterface, docs has
- *            to be updated.
  */
 interface FactoryInterface
 {

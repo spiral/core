@@ -24,7 +24,7 @@ interface BinderInterface
      * @param string                $alias
      * @param string|array|callable $resolver
      */
-    public function bind(string $alias, $resolver);
+    public function bind(string $alias, $resolver): void;
 
     /**
      * Bind value resolver to container alias to be executed as cached. Resolver can be class name
@@ -33,7 +33,7 @@ interface BinderInterface
      * @param string                $alias
      * @param string|array|callable $resolver
      */
-    public function bindSingleton(string $alias, $resolver);
+    public function bindSingleton(string $alias, $resolver): void;
 
     /**
      * Check if alias points to constructed instance (singleton).
@@ -41,10 +41,10 @@ interface BinderInterface
      * @param string $alias
      * @return bool
      */
-    public function hasInstance(string $alias);
+    public function hasInstance(string $alias): bool;
 
     /**
      * @param string $alias
      */
-    public function removeBinding(string $alias);
+    public function removeBinding(string $alias): void;
 }

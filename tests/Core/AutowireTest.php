@@ -76,9 +76,12 @@ class AutowireTest extends TestCase
     {
         $container = new Container();
 
-        $object = $container->make(DependedClass::class, [
-            'name' => 'some-name'
-        ]);
+        $object = $container->make(
+            DependedClass::class,
+            [
+                'name' => 'some-name'
+            ]
+        );
 
         $this->assertInstanceOf(DependedClass::class, $object);
         $this->assertSame('some-name', $object->getName());
@@ -111,9 +114,12 @@ class AutowireTest extends TestCase
 
         $container->bind(SampleClass::class, ExtendedSample::class);
 
-        $object = $container->make(DependedClass::class, [
-            'name' => 'some-name'
-        ]);
+        $object = $container->make(
+            DependedClass::class,
+            [
+                'name' => 'some-name'
+            ]
+        );
 
         $this->assertInstanceOf(DependedClass::class, $object);
         $this->assertSame('some-name', $object->getName());
@@ -129,9 +135,12 @@ class AutowireTest extends TestCase
         $container = new Container();
 
         $container->bind(SampleClass::class, \WrongClass::class);
-        $container->make(DependedClass::class, [
-            'name' => 'some-name'
-        ]);
+        $container->make(
+            DependedClass::class,
+            [
+                'name' => 'some-name'
+            ]
+        );
     }
 
     /**
@@ -144,9 +153,12 @@ class AutowireTest extends TestCase
 
         $container->bind(SampleClass::class, \WrongClass::class);
 
-        $object = $container->make(SoftDependedClass::class, [
-            'name' => 'some-name'
-        ]);
+        $object = $container->make(
+            SoftDependedClass::class,
+            [
+                'name' => 'some-name'
+            ]
+        );
 
         $this->assertInstanceOf(SoftDependedClass::class, $object);
         $this->assertSame('some-name', $object->getName());
@@ -157,34 +169,43 @@ class AutowireTest extends TestCase
     {
         $container = new Container();
 
-        $object = $container->make(TypedClass::class, [
-            'string' => 'string',
-            'int'    => 123,
-            'float'  => 123.00,
-            'bool'   => true
-        ]);
+        $object = $container->make(
+            TypedClass::class,
+            [
+                'string' => 'string',
+                'int'    => 123,
+                'float'  => 123.00,
+                'bool'   => true
+            ]
+        );
 
         $this->assertInstanceOf(TypedClass::class, $object);
 
         $container = new Container();
 
-        $object = $container->make(TypedClass::class, [
-            'string' => 'string',
-            'int'    => '123',
-            'float'  => '123.00',
-            'bool'   => 1
-        ]);
+        $object = $container->make(
+            TypedClass::class,
+            [
+                'string' => 'string',
+                'int'    => '123',
+                'float'  => '123.00',
+                'bool'   => 1
+            ]
+        );
 
         $this->assertInstanceOf(TypedClass::class, $object);
 
         $container = new Container();
 
-        $object = $container->make(TypedClass::class, [
-            'string' => 'string',
-            'int'    => 123,
-            'float'  => 123.00,
-            'bool'   => 0
-        ]);
+        $object = $container->make(
+            TypedClass::class,
+            [
+                'string' => 'string',
+                'int'    => 123,
+                'float'  => 123.00,
+                'bool'   => 0
+            ]
+        );
 
         $this->assertInstanceOf(TypedClass::class, $object);
     }
@@ -198,12 +219,15 @@ class AutowireTest extends TestCase
     {
         $container = new Container();
 
-        $object = $container->make(TypedClass::class, [
-            'string' => null,
-            'int'    => 123,
-            'float'  => 123.00,
-            'bool'   => true
-        ]);
+        $object = $container->make(
+            TypedClass::class,
+            [
+                'string' => null,
+                'int'    => 123,
+                'float'  => 123.00,
+                'bool'   => true
+            ]
+        );
 
         $this->assertInstanceOf(TypedClass::class, $object);
     }
@@ -217,12 +241,15 @@ class AutowireTest extends TestCase
     {
         $container = new Container();
 
-        $object = $container->make(TypedClass::class, [
-            'string' => '',
-            'int'    => 'yo!',
-            'float'  => 123.00,
-            'bool'   => true
-        ]);
+        $object = $container->make(
+            TypedClass::class,
+            [
+                'string' => '',
+                'int'    => 'yo!',
+                'float'  => 123.00,
+                'bool'   => true
+            ]
+        );
 
         $this->assertInstanceOf(TypedClass::class, $object);
     }
@@ -236,12 +263,15 @@ class AutowireTest extends TestCase
     {
         $container = new Container();
 
-        $object = $container->make(TypedClass::class, [
-            'string' => '',
-            'int'    => 123,
-            'float'  => '~',
-            'bool'   => true
-        ]);
+        $object = $container->make(
+            TypedClass::class,
+            [
+                'string' => '',
+                'int'    => 123,
+                'float'  => '~',
+                'bool'   => true
+            ]
+        );
 
         $this->assertInstanceOf(TypedClass::class, $object);
     }
@@ -255,12 +285,15 @@ class AutowireTest extends TestCase
     {
         $container = new Container();
 
-        $object = $container->make(TypedClass::class, [
-            'string' => '',
-            'int'    => 123,
-            'float'  => 1.00,
-            'bool'   => 'true'
-        ]);
+        $object = $container->make(
+            TypedClass::class,
+            [
+                'string' => '',
+                'int'    => 123,
+                'float'  => 1.00,
+                'bool'   => 'true'
+            ]
+        );
 
         $this->assertInstanceOf(TypedClass::class, $object);
     }
@@ -274,13 +307,16 @@ class AutowireTest extends TestCase
     {
         $container = new Container();
 
-        $object = $container->make(TypedClass::class, [
-            'string' => '',
-            'int'    => 123,
-            'float'  => 1.00,
-            'bool'   => true,
-            'array'  => 'not array'
-        ]);
+        $object = $container->make(
+            TypedClass::class,
+            [
+                'string' => '',
+                'int'    => 123,
+                'float'  => 1.00,
+                'bool'   => true,
+                'array'  => 'not array'
+            ]
+        );
 
         $this->assertInstanceOf(TypedClass::class, $object);
     }
@@ -289,12 +325,15 @@ class AutowireTest extends TestCase
     {
         $container = new Container();
 
-        $object = $container->make(TypedClass::class, [
-            'string' => '',
-            'int'    => 123,
-            'float'  => 1.00,
-            'bool'   => true
-        ]);
+        $object = $container->make(
+            TypedClass::class,
+            [
+                'string' => '',
+                'int'    => 123,
+                'float'  => 1.00,
+                'bool'   => true
+            ]
+        );
 
         $this->assertInstanceOf(TypedClass::class, $object);
     }
@@ -303,13 +342,16 @@ class AutowireTest extends TestCase
     {
         $container = new Container();
 
-        $object = $container->make(TypedClass::class, [
-            'string' => '',
-            'int'    => 123,
-            'float'  => 1.00,
-            'bool'   => true,
-            'pong'   => null
-        ]);
+        $object = $container->make(
+            TypedClass::class,
+            [
+                'string' => '',
+                'int'    => 123,
+                'float'  => 1.00,
+                'bool'   => true,
+                'pong'   => null
+            ]
+        );
 
         $this->assertInstanceOf(TypedClass::class, $object);
     }
@@ -320,10 +362,13 @@ class AutowireTest extends TestCase
 
         $container->bind('sample-binding', $s = new SampleClass());
 
-        $object = $container->make(SoftDependedClass::class, [
-            'name'   => 'some-name',
-            'sample' => new Container\Autowire('sample-binding')
-        ]);
+        $object = $container->make(
+            SoftDependedClass::class,
+            [
+                'name'   => 'some-name',
+                'sample' => new Container\Autowire('sample-binding')
+            ]
+        );
 
         $this->assertSame($s, $object->getSample());
     }
@@ -340,9 +385,14 @@ class AutowireTest extends TestCase
     public function testBingToAutowire(): void
     {
         $container = new Container();
-        $container->bind('abc', new Container\Autowire(SoftDependedClass::class, [
-            'name' => 'Fixed'
-        ]));
+        $container->bind(
+            'abc',
+            new Container\Autowire(
+                SoftDependedClass::class, [
+                'name' => 'Fixed'
+            ]
+            )
+        );
 
         /**
          * @var SoftDependedClass $abc
@@ -359,9 +409,13 @@ class AutowireTest extends TestCase
         /**
          * @var SoftDependedClass $abc
          */
-        $abc = $container->get(new Container\Autowire(SoftDependedClass::class, [
-            'name' => 'Fixed'
-        ]));
+        $abc = $container->get(
+            new Container\Autowire(
+                SoftDependedClass::class, [
+                'name' => 'Fixed'
+            ]
+            )
+        );
 
         $this->assertSame('Fixed', $abc->getName());
     }
@@ -369,9 +423,14 @@ class AutowireTest extends TestCase
     public function testBingToAutowireWithParameters(): void
     {
         $container = new Container();
-        $container->bind('abc', new Container\Autowire(SoftDependedClass::class, [
-            'name' => 'Fixed'
-        ]));
+        $container->bind(
+            'abc',
+            new Container\Autowire(
+                SoftDependedClass::class, [
+                'name' => 'Fixed'
+            ]
+            )
+        );
 
         /**
          * @var SoftDependedClass $abc
@@ -381,16 +440,44 @@ class AutowireTest extends TestCase
         $this->assertSame('Overwritten', $abc->getName());
     }
 
+    public function testBingToAutowireWithParametersViaArray(): void
+    {
+        $container = new Container();
+        $container->bind(
+            'abc',
+            Container\Autowire::wire(
+                [
+                    'class'   => SoftDependedClass::class,
+                    'options' => [
+                        'name' => 'Fixed'
+                    ]
+                ]
+            )
+        );
+
+        /**
+         * @var SoftDependedClass $abc
+         */
+        $abc = $container->make('abc', ['name' => 'Overwritten']);
+
+        $this->assertSame('Overwritten', $abc->getName());
+    }
+
+
     public function testSerialize(): void
     {
-        $a = new Container\Autowire(SoftDependedClass::class, [
+        $a = new Container\Autowire(
+            SoftDependedClass::class, [
             'name' => 'Fixed'
-        ]);
+        ]
+        );
 
-        $b = Container\Autowire::__set_state([
-            'alias'      => SoftDependedClass::class,
-            'parameters' => ['name' => 'Fixed']
-        ]);
+        $b = Container\Autowire::__set_state(
+            [
+                'alias'      => SoftDependedClass::class,
+                'parameters' => ['name' => 'Fixed']
+            ]
+        );
         $this->assertEquals($a, $b);
     }
 }
