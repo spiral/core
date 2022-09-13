@@ -1,17 +1,9 @@
 <?php
 
-/**
- * Spiral Framework.
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Spiral\Core;
 
-use Spiral\Core\Exception\Container\ArgumentException;
 use Spiral\Core\Exception\Container\AutowireException;
 
 /**
@@ -24,12 +16,15 @@ interface FactoryInterface
      * by user, rest of constructor parameters must be filled by container. Method might return
      * pre-constructed singleton when no parameters are specified.
      *
-     * @param array  $parameters Parameters to construct new class.
+     * @template T
      *
-     * @return mixed|null|object
+     * @param class-string<T>|string $alias
+     * @param array $parameters Parameters to construct new class.
+     *
+     * @return T
+     * @psalm-return ($alias is class-string ? T : mixed)
      *
      * @throws AutowireException
-     * @throws ArgumentException
      */
-    public function make(string $alias, array $parameters = []);
+    public function make(string $alias, array $parameters = []): mixed;
 }

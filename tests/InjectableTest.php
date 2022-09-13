@@ -1,12 +1,5 @@
 <?php
 
-/**
- * Spiral Framework.
- *
- * @license   MIT
- * @author    Anton Titov (Wolfy-J)
- */
-
 declare(strict_types=1);
 
 namespace Spiral\Tests\Core;
@@ -19,6 +12,8 @@ use Spiral\Core\ConfigsInterface;
 use Spiral\Core\Container;
 use Spiral\Core\Exception\Container\AutowireException;
 use Spiral\Core\Exception\Container\InjectionException;
+use Spiral\Tests\Core\Fixtures\InjectableClassInterface;
+use Spiral\Tests\Core\Fixtures\InjectableClassRealization;
 use Spiral\Tests\Core\Fixtures\InvalidInjector;
 use Spiral\Tests\Core\Fixtures\SampleClass;
 use Spiral\Tests\Core\Fixtures\TestConfig;
@@ -27,7 +22,7 @@ class InjectableTest extends TestCase
 {
     public function testMissingInjector(): void
     {
-        $this->expectExceptionMessage("Undefined class or binding 'Spiral\Core\ConfigsInterface'");
+        $this->expectExceptionMessage("Undefined class or binding `Spiral\Core\ConfigsInterface`");
         $this->expectException(AutowireException::class);
 
         $container = new Container();
@@ -50,7 +45,7 @@ class InjectableTest extends TestCase
     public function testInvalidInjectorBinding(): void
     {
         $this->expectException(AutowireException::class);
-        $this->expectExceptionMessage("Undefined class or binding 'invalid-injector'");
+        $this->expectExceptionMessage("Undefined class or binding `invalid-injector`");
 
         $container = new Container();
 
@@ -73,28 +68,10 @@ class InjectableTest extends TestCase
         $container->get(TestConfig::class);
     }
 
-    public function testGetInjectors(): void
-    {
-        $container = new Container();
-
-        $container->bindInjector(TestConfig::class, 'invalid-injector');
-
-        $injectors = $container->getInjectors();
-
-        $this->assertNotEmpty($injectors);
-        $this->assertArrayHasKey(TestConfig::class, $injectors);
-        $this->assertSame('invalid-injector', $injectors[TestConfig::class]);
-
-        $container->removeInjector(TestConfig::class);
-        $injectors = $container->getInjectors();
-
-        $this->assertEmpty($injectors);
-    }
-
     public function testInjectorOuterBinding(): void
     {
         $this->expectException(AutowireException::class);
-        $this->expectExceptionMessage("Undefined class or binding 'invalid-configurator'");
+        $this->expectExceptionMessage("Undefined class or binding `invalid-configurator`");
         $container = new Container();
         $container->bind(ConfigsInterface::class, 'invalid-configurator');
 
@@ -161,16 +138,30 @@ class InjectableTest extends TestCase
         $container->bind(ConfigsInterface::class, $configurator);
 
         $configurator->shouldReceive('createInjection')
-            ->with(m::on(static function (ReflectionClass $r) {
-                return $r->getName() === TestConfig::class;
-            }), 'contextArgument')
-            ->andReturn($expected)
-        ;
+            ->with(
+                m::on(static fn(ReflectionClass $r) => $r->getName() === TestConfig::class),
+                'contextArgument'
+            )
+            ->andReturn($expected);
 
-        $arguments = $container->resolveArguments(new ReflectionMethod($this, 'methodInjection'));
-
+        $arguments = $container->resolveArguments(new ReflectionMethod(...[$this, 'methodInjection']));
         $this->assertCount(1, $arguments);
         $this->assertSame($expected, $arguments[0]);
+    }
+
+    public function testCheckIsClassHasInjector(): void
+    {
+        $configurator = m::mock(ConfigsInterface::class);
+
+        $container = new Container();
+        $container->bind(ConfigsInterface::class, $configurator);
+        $container->bindInjector(InjectableClassInterface::class, 'bar');
+
+        $this->assertFalse($container->hasInjector(SampleClass::class));
+
+        $this->assertTrue($container->hasInjector(TestConfig::class));
+        $this->assertTrue($container->hasInjector(InjectableClassInterface::class));
+        $this->assertTrue($container->hasInjector(InjectableClassRealization::class));
     }
 
     /**
