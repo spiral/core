@@ -50,7 +50,7 @@ final class Resolver
     private static function getScope(ContainerInterface $c): string
     {
         return \implode('.', \array_reverse(\array_map(
-            static fn(?string $name): string => $name ?? 'null',
+            static fn (?string $name): string => $name ?? 'null',
             Introspector::scopeNames($c),
         )));
     }
