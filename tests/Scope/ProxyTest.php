@@ -306,6 +306,9 @@ final class ProxyTest extends BaseTestCase
         $root->bind(UserInterface::class, new \Spiral\Core\Config\Proxy(UserInterface::class));
 
         $this->expectException(RecursiveProxyException::class);
+        $this->expectExceptionMessage(
+            'Recursive proxy detected for `Spiral\Tests\Core\Scope\Stub\UserInterface` in `root.null` scope.',
+        );
 
         $root->runScope(
             new Scope(),
