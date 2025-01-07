@@ -14,7 +14,8 @@ use Spiral\Tests\Core\Fixtures\Storage;
 
 class InvokerTest extends TestCase
 {
-    private Container $container;
+    /** @var Container */
+    private $container;
 
     protected function setUp(): void
     {
@@ -30,10 +31,10 @@ class InvokerTest extends TestCase
 
         $result = $this->container->invoke([$object, 'makeBucket'], ['name' => 'bar']);
 
-        self::assertSame($bucket, $result['bucket']);
-        self::assertInstanceOf(SampleClass::class, $result['class']);
-        self::assertSame('bar', $result['name']);
-        self::assertSame('baz', $result['path']);
+        $this->assertSame($bucket, $result['bucket']);
+        $this->assertInstanceOf(SampleClass::class, $result['class']);
+        $this->assertSame('bar', $result['name']);
+        $this->assertSame('baz', $result['path']);
     }
 
     public function testCallValidCallableArrayWithClassResolving(): void
@@ -42,10 +43,10 @@ class InvokerTest extends TestCase
 
         $result = $this->container->invoke([Storage::class, 'makeBucket'], ['name' => 'bar']);
 
-        self::assertSame($bucket, $result['bucket']);
-        self::assertInstanceOf(SampleClass::class, $result['class']);
-        self::assertSame('bar', $result['name']);
-        self::assertSame('baz', $result['path']);
+        $this->assertSame($bucket, $result['bucket']);
+        $this->assertInstanceOf(SampleClass::class, $result['class']);
+        $this->assertSame('bar', $result['name']);
+        $this->assertSame('baz', $result['path']);
     }
 
     public function testCallValidCallableArrayWithResolvingFromContainer(): void
@@ -55,10 +56,10 @@ class InvokerTest extends TestCase
 
         $result = $this->container->invoke(['foo', 'makeBucket'], ['name' => 'bar']);
 
-        self::assertSame($bucket, $result['bucket']);
-        self::assertInstanceOf(SampleClass::class, $result['class']);
-        self::assertSame('bar', $result['name']);
-        self::assertSame('baz', $result['path']);
+        $this->assertSame($bucket, $result['bucket']);
+        $this->assertInstanceOf(SampleClass::class, $result['class']);
+        $this->assertSame('bar', $result['name']);
+        $this->assertSame('baz', $result['path']);
     }
 
     public function testCallValidCallableArrayWithNotResolvableDependencies(): void
@@ -75,10 +76,10 @@ class InvokerTest extends TestCase
 
         $result = $this->container->invoke(Storage::class.'::createBucket', ['name' => 'bar']);
 
-        self::assertSame($bucket, $result['bucket']);
-        self::assertInstanceOf(SampleClass::class, $result['class']);
-        self::assertSame('bar', $result['name']);
-        self::assertSame('baz', $result['path']);
+        $this->assertSame($bucket, $result['bucket']);
+        $this->assertInstanceOf(SampleClass::class, $result['class']);
+        $this->assertSame('bar', $result['name']);
+        $this->assertSame('baz', $result['path']);
     }
 
     public function testCallValidCallableStringWithNotResolvableDependencies(): void
@@ -94,14 +95,14 @@ class InvokerTest extends TestCase
         $this->container->bindSingleton(Bucket::class, $bucket = new Bucket('foo'));
 
         $result = $this->container->invoke(
-            static fn(Bucket $bucket, SampleClass $class, string $name, string $path = 'baz'): array => \compact('bucket', 'class', 'name', 'path'),
+            static fn(Bucket $bucket, SampleClass $class, string $name, string $path = 'baz') => \compact('bucket', 'class', 'name', 'path'),
             ['name' => 'bar']
         );
 
-        self::assertSame($bucket, $result['bucket']);
-        self::assertInstanceOf(SampleClass::class, $result['class']);
-        self::assertSame('bar', $result['name']);
-        self::assertSame('baz', $result['path']);
+        $this->assertSame($bucket, $result['bucket']);
+        $this->assertInstanceOf(SampleClass::class, $result['class']);
+        $this->assertSame('bar', $result['name']);
+        $this->assertSame('baz', $result['path']);
     }
 
     public function testCallValidClosureWithNotResolvableDependencies(): void
@@ -110,7 +111,7 @@ class InvokerTest extends TestCase
         $this->expectExceptionMessage('Unable to resolve required argument `name` when resolving');
 
         $this->container->invoke(
-            static fn(Bucket $bucket, SampleClass $class, string $name, string $path = 'baz'): array => \compact('bucket', 'class', 'name', 'path'),
+            static fn(Bucket $bucket, SampleClass $class, string $name, string $path = 'baz') => \compact('bucket', 'class', 'name', 'path'),
             ['name' => 'bar']
         );
     }

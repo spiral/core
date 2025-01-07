@@ -13,29 +13,42 @@ use Spiral\Tests\Core\Fixtures\SampleClass;
 
 class BindingsTest extends TestCase
 {
+    public function testBasicBinding(): void
+    {
+        $container = new Container();
+        $this->assertInstanceOf(ContainerInterface::class, $container);
+
+        $this->assertFalse($container->has('abc'));
+
+        $container->bind('abc', fn() => 'hello');
+
+        $this->assertTrue($container->has('abc'));
+        $this->assertEquals('hello', $container->get('abc'));
+    }
+
     public function testStringBinding(): void
     {
         $container = new Container();
-        self::assertInstanceOf(ContainerInterface::class, $container);
-        self::assertFalse($container->has('abc'));
 
-        $container->bind('abc', static fn(): string => 'hello');
+        $this->assertFalse($container->has('abc'));
+        $container->bind('abc', fn() => 'hello');
+
         $container->bind('dce', 'abc');
 
-        self::assertTrue($container->has('dce'));
-        self::assertEquals('hello', $container->get('abc'));
-        self::assertEquals($container->get('abc'), $container->get('dce'));
+        $this->assertTrue($container->has('dce'));
+        $this->assertEquals('hello', $container->get('abc'));
+        $this->assertEquals($container->get('abc'), $container->get('dce'));
     }
 
     public function testClassBinding(): void
     {
         $container = new Container();
 
-        self::assertFalse($container->has('sampleClass'));
+        $this->assertFalse($container->has('sampleClass'));
         $container->bind('sampleClass', SampleClass::class);
 
-        self::assertTrue($container->has('sampleClass'));
-        self::assertInstanceOf(SampleClass::class, $container->get('sampleClass'));
+        $this->assertTrue($container->has('sampleClass'));
+        $this->assertInstanceOf(SampleClass::class, $container->get('sampleClass'));
     }
 
     public function testFactoryBinding(): void
@@ -43,7 +56,7 @@ class BindingsTest extends TestCase
         $container = new Container();
 
         $container->bindSingleton('sampleClass', [Factory::class, 'sampleClass']);
-        self::assertInstanceOf(SampleClass::class, $container->get('sampleClass'));
+        $this->assertInstanceOf(SampleClass::class, $container->get('sampleClass'));
     }
 
     public function testInstanceBinding(): void
@@ -54,8 +67,8 @@ class BindingsTest extends TestCase
 
         $instance = $container->get('sampleClass');
 
-        self::assertInstanceOf(SampleClass::class, $instance);
-        self::assertSame($instance, $container->get('sampleClass'));
+        $this->assertInstanceOf(SampleClass::class, $instance);
+        $this->assertSame($instance, $container->get('sampleClass'));
     }
 
     public function testAutoScalarBinding(): void

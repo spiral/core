@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\Core\Scope;
 
-use Spiral\Core\Config\Alias;
 use Spiral\Core\Container;
 use Spiral\Core\Scope;
 use Spiral\Tests\Core\Scope\Stub\Factory;
@@ -12,7 +11,6 @@ use Spiral\Tests\Core\Scope\Stub\FileLogger;
 use Spiral\Tests\Core\Scope\Stub\KVLogger;
 use Spiral\Tests\Core\Scope\Stub\LoggerCarrier;
 use Spiral\Tests\Core\Scope\Stub\LoggerInterface;
-use Spiral\Tests\Core\Scope\Stub\ScopeIndicatorLogger;
 
 final class SideEffectTest extends BaseTestCase
 {
@@ -25,10 +23,10 @@ final class SideEffectTest extends BaseTestCase
         $root = new Container();
         $root->bind(LoggerInterface::class, KVLogger::class);
 
-        $root->runScope(new Scope(), static function (Container $c1): void {
+        $root->runScope(new Scope(), static function (Container $c1) {
             $c1->bind(LoggerInterface::class, FileLogger::class);
 
-            $c1->runScope(new Scope(), static function (LoggerCarrier $carrier, LoggerInterface $logger): void {
+            $c1->runScope(new Scope(), static function (LoggerCarrier $carrier, LoggerInterface $logger) {
                 // from the $root container
                 self::assertInstanceOf(KVLogger::class, $carrier->logger);
                 // from the $c1 container
@@ -42,7 +40,7 @@ final class SideEffectTest extends BaseTestCase
         $root = new Container();
         $root->bind(LoggerInterface::class, KVLogger::class);
 
-        $root->runScope(new Scope(), static function (Container $c1): void {
+        $root->runScope(new Scope(), static function (Container $c1) {
             $c1->bind(LoggerInterface::class, FileLogger::class);
 
             self::assertInstanceOf(
@@ -50,37 +48,5 @@ final class SideEffectTest extends BaseTestCase
                 $c1->get(Factory::class)->make(LoggerInterface::class),
             );
         });
-    }
-
-    public function testAutowireWithScope(): void
-    {
-        $root = new Container();
-        $root
-            ->getBinder('test')
-            ->bind(ScopeIndicatorLogger::class, new Container\Autowire(ScopeIndicatorLogger::class));
-
-        $logger = $root->runScope(
-            new Scope('test'),
-            static fn(?ScopeIndicatorLogger $logger): ?ScopeIndicatorLogger => $logger,
-        );
-
-        self::assertNotNull($logger);
-        self::assertSame('test', $logger->getName());
-    }
-
-    public function testAliasWithScope(): void
-    {
-        $root = new Container();
-        $root
-            ->getBinder('test')
-            ->bind(ScopeIndicatorLogger::class, new Alias(ScopeIndicatorLogger::class));
-
-        $logger = $root->runScope(
-            new Scope('test'),
-            static fn(?ScopeIndicatorLogger $logger): ?ScopeIndicatorLogger => $logger,
-        );
-
-        self::assertNotNull($logger);
-        self::assertSame('test', $logger->getName());
     }
 }

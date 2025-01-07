@@ -30,9 +30,9 @@ final class FibersTest extends BaseTestCase
 
         FiberHelper::runInFiber(
             self::functionScopedTestDataIterator(),
-            static function (mixed $suspendValue): void {
+            static function (mixed $suspendValue) {
                 self::assertNull(ContainerScope::getContainer());
-                self::assertContains($suspendValue, self::TEST_DATA);
+                self::assertTrue(\in_array($suspendValue, self::TEST_DATA, true));
             },
         );
     }
@@ -92,7 +92,7 @@ final class FibersTest extends BaseTestCase
         $this->expectExceptionMessage('test');
 
         FiberHelper::runInFiber(
-            static fn(): mixed => (new Container())->runScoped(
+            static fn() => (new Container())->runScoped(
                 function (): string {
                     $result = '';
                     $result .= Fiber::suspend('foo');
@@ -109,7 +109,7 @@ final class FibersTest extends BaseTestCase
     public function testCatchThrownException(): void
     {
         $result = FiberHelper::runInFiber(
-            static fn(): mixed => (new Container())->runScoped(
+            static fn() => (new Container())->runScoped(
                 function (): string {
                     $result = '';
                     $result .= Fiber::suspend('foo');
@@ -156,7 +156,7 @@ final class FibersTest extends BaseTestCase
                 self::assertInstanceOf(DateTime::class, $c2->get('foo'));
 
                 return $c2->runScoped(
-                    static function (ContainerInterface $c3) use ($load): \stdClass {
+                    static function (ContainerInterface $c3) use ($load) {
                         // check local binding
                         self::assertTrue($c3->has('bar'));
 

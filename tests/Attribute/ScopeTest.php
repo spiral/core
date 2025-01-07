@@ -17,7 +17,7 @@ final class ScopeTest extends TestCase
     {
         $scope = new Scope($name);
 
-        self::assertSame($expected, $scope->name);
+        $this->assertSame($expected, $scope->name);
     }
 
     public static function scopeNameDataProvider(): \Traversable
