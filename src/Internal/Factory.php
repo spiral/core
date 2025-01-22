@@ -225,19 +225,12 @@ final class Factory implements FactoryInterface
         array $arguments,
     ): object {
         $avoidCache = $arguments !== [];
-
-        if ($avoidCache) {
-            return $this->createInstance(
+        return $avoidCache
+            ? $this->createInstance(
                 new Ctx(alias: $alias, class: $binding->value::class, context: $context),
                 $arguments,
-            );
-        }
-
-        if ($binding->singleton) {
-            $this->state->singletons[$alias] = $binding->value;
-        }
-
-        return $binding->value;
+            )
+            : $binding->value;
     }
 
     private function resolveAutowire(
@@ -246,13 +239,9 @@ final class Factory implements FactoryInterface
         Stringable|string|null $context,
         array $arguments,
     ): mixed {
-        $target = $binding->autowire->alias;
-        $ctx = new Ctx(alias: $alias, class: $target, context: $context, singleton: $binding->singleton);
+        $instance = $binding->autowire->resolve($this, $arguments);
 
-        $instance = $alias === $target
-            ? $this->autowire($ctx, \array_merge($binding->autowire->parameters, $arguments))
-            : $binding->autowire->resolve($this, $arguments);
-
+        $ctx = new Ctx(alias: $alias, class: $alias, context: $context, singleton: $binding->singleton);
         return $this->validateNewInstance($instance, $ctx, $arguments);
     }
 

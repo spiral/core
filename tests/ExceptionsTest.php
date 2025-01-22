@@ -69,12 +69,12 @@ class ExceptionsTest extends TestCase
             $method
         );
 
-        self::assertInstanceOf(AutowireException::class, $e);
-        self::assertInstanceOf(ContainerException::class, $e);
-        self::assertInstanceOf(ContainerExceptionInterface::class, $e);
+        $this->assertInstanceOf(AutowireException::class, $e);
+        $this->assertInstanceOf(ContainerException::class, $e);
+        $this->assertInstanceOf(ContainerExceptionInterface::class, $e);
 
-        self::assertSame($method, $e->getContext());
-        self::assertSame('param', $e->getParameter()->getName());
+        $this->assertSame($method, $e->getContext());
+        $this->assertSame('param', $e->getParameter()->getName());
     }
 
     /**
@@ -138,13 +138,16 @@ class ExceptionsTest extends TestCase
         try {
             $container->get('invalid');
         } catch (ContainerException $e) {
-            self::assertSame(<<<MARKDOWN
+            $this->assertSame(
+                <<<MARKDOWN
                 Can't resolve `invalid`: undefined class or binding `invalid`.
                 Container trace list:
                 - action: 'autowire'
                   alias: 'invalid'
                   context: null
-                MARKDOWN, $e->getMessage());
+                MARKDOWN,
+                $e->getMessage(),
+            );
         }
 
         $this->expectException(ContainerException::class);
@@ -184,7 +187,7 @@ class ExceptionsTest extends TestCase
         $notConstructed->bind('Spiral\Tests\Core\Fixtures\InvalidClass', WithPrivateConstructor::class);
 
         $withClosure = new Container();
-        $withClosure->bind('Spiral\Tests\Core\Fixtures\InvalidClass', static fn(): string => 'FooBar');
+        $withClosure->bind('Spiral\Tests\Core\Fixtures\InvalidClass', static fn() => 'FooBar');
 
         $closureWithContainer = new Container();
         $closureWithContainer->bind(

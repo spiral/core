@@ -117,7 +117,7 @@ final class FinalizeAttributeTest extends BaseTestCase
     }
 
     #[Group('scrutinizer-ignore')]
-    public function testExceptionOnDestroy(): void
+    public function testExceptionOnDestroy()
     {
         $root = self::makeContainer();
 
@@ -125,7 +125,7 @@ final class FinalizeAttributeTest extends BaseTestCase
         self::expectExceptionMessage('An exception has been thrown during finalization of the scope `foo`');
 
         try {
-            $root->runScoped(static function (Container $c1): void {
+            $root->runScoped(static function (Container $c1) {
                 $obj = $c1->get(AttrScopeFooFinalize::class);
                 $obj->throwException = true;
             }, name: 'foo');
@@ -146,7 +146,7 @@ final class FinalizeAttributeTest extends BaseTestCase
     }
 
     #[Group('scrutinizer-ignore')]
-    public function testManyExceptionsOnDestroy(): void
+    public function testManyExceptionsOnDestroy()
     {
         $root = self::makeContainer();
 
@@ -154,7 +154,7 @@ final class FinalizeAttributeTest extends BaseTestCase
         self::expectExceptionMessage('3 exceptions have been thrown during finalization of the scope `foo`');
 
         try {
-            $root->runScoped(static function (Container $c1): void {
+            $root->runScoped(static function (Container $c1) {
                 $c1->get(AttrScopeFooFinalize::class)->throwException = true;
                 $c1->get(AttrScopeFooFinalize::class)->throwException = true;
                 $c1->get(AttrScopeFooFinalize::class)->throwException = true;
