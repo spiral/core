@@ -15,17 +15,17 @@ final class ExceptionsTest extends BaseTestCase
 {
     public function testParentScopeResolvingCustomException(): void
     {
-        // $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(\Exception::class);
         $this->expectExceptionMessage(ExceptionConstructor::MESSAGE);
 
         $container = new Container();
 
-        $container->runScoped(static function (Container $c1) {
+        $container->runScoped(static function (Container $c1): void {
             try {
                 $c1->get(ExceptionConstructor::class);
                 self::fail('Exception should be thrown');
             } catch (\Throwable $e) {
-                // self::assertInstanceOf(\InvalidArgumentException::class, $e);
+                self::assertInstanceOf(\Exception::class, $e);
                 throw $e;
             }
         });
@@ -33,17 +33,17 @@ final class ExceptionsTest extends BaseTestCase
 
     public function testParentScopeThrowConstructorErrorOnResolving(): void
     {
-        // $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(\Exception::class);
         $this->expectExceptionMessage(ExceptionConstructor::MESSAGE);
 
         $container = new Container();
 
-        $container->runScoped(static function (Container $c1) {
+        $container->runScoped(static function (Container $c1): void {
             try {
                 $c1->get(ExceptionConstructor::class);
                 self::fail('Exception should be thrown');
             } catch (\Throwable $e) {
-                // self::assertInstanceOf(\InvalidArgumentException::class, $e);
+                self::assertInstanceOf(\Exception::class, $e);
                 throw $e;
             }
         });
@@ -52,11 +52,11 @@ final class ExceptionsTest extends BaseTestCase
     public function testParentScopeResolvingNotFound(): void
     {
         self::expectException(NotFoundException::class);
-        self::expectExceptionMessage('jump to parent scope');
+        self::expectExceptionMessage("jump to scope: 'root'");
 
         $container = new Container();
 
-        $container->runScoped(static function (Container $c1) {
+        $container->runScoped(static function (Container $c1): void {
             try {
                 $c1->get(DatetimeCarrier::class);
                 self::fail('Exception should be thrown');
@@ -64,7 +64,7 @@ final class ExceptionsTest extends BaseTestCase
                 self::assertInstanceOf(NotFoundException::class, $e);
                 self::assertInstanceOf(NotFoundException::class, $e->getPrevious());
                 self::assertStringContainsString(
-                    "Can't resolve `Spiral\\Tests\\Core\\Scope\\Stub\\DatetimeCarrier`",
+                    "Can't autowire `DateTimeInterface`: class or injector not found",
                     $e->getPrevious()->getMessage(),
                 );
 

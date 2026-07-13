@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace Spiral\Tests\Core\Scope;
 
 use Psr\Container\ContainerInterface;
-use ReflectionParameter;
 use Spiral\Core\Attribute\Proxy;
+use Spiral\Core\Config\Proxy as ProxyConfig;
 use Spiral\Core\Container;
 use Spiral\Core\Container\InjectorInterface;
+use Spiral\Core\ContainerScope;
+use Spiral\Core\Exception\Container\RecursiveProxyException;
 use Spiral\Core\Scope;
 use Spiral\Tests\Core\Scope\Stub\Context;
 use Spiral\Tests\Core\Scope\Stub\ContextInterface;
@@ -20,7 +22,6 @@ use Spiral\Tests\Core\Scope\Stub\ScopedProxyLoggerCarrier;
 use Spiral\Tests\Core\Scope\Stub\ScopedProxyStdClass;
 use Spiral\Tests\Core\Scope\Stub\User;
 use Spiral\Tests\Core\Scope\Stub\UserInterface;
-use WeakReference;
 
 final class ProxyTest extends BaseTestCase
 {
@@ -35,14 +36,14 @@ final class ProxyTest extends BaseTestCase
         $root->getBinder('http')->bindSingleton(LoggerInterface::class, KVLogger::class);
 
         FiberHelper::runFiberSequence(
-            static fn() => $root->runScope(
+            static fn(): mixed => $root->runScope(
                 new Scope(
                     name: 'http',
                     bindings: [
                         LoggerInterface::class => KVLogger::class,
                     ],
                 ),
-                static function (ScopedProxyLoggerCarrier $carrier, LoggerInterface $logger) use ($lc) {
+                static function (ScopedProxyLoggerCarrier $carrier, LoggerInterface $logger) use ($lc): void {
                     // from the current `foo` scope
                     self::assertInstanceOf(KVLogger::class, $logger);
 
@@ -53,16 +54,16 @@ final class ProxyTest extends BaseTestCase
                         self::assertSame($lc, $carrier);
                         \Fiber::suspend();
                     }
-                }
+                },
             ),
-            static fn() => $root->runScope(
+            static fn(): mixed => $root->runScope(
                 new Scope(
                     name: 'http',
                     bindings: [
                         LoggerInterface::class => FileLogger::class,
                     ],
                 ),
-                static function (ScopedProxyLoggerCarrier $carrier, LoggerInterface $logger) use ($lc) {
+                static function (ScopedProxyLoggerCarrier $carrier, LoggerInterface $logger) use ($lc): void {
                     // from the current `foo` scope
                     self::assertInstanceOf(FileLogger::class, $logger);
 
@@ -73,7 +74,7 @@ final class ProxyTest extends BaseTestCase
                         self::assertSame($lc, $carrier);
                         \Fiber::suspend();
                     }
-                }
+                },
             ),
         );
     }
@@ -83,14 +84,14 @@ final class ProxyTest extends BaseTestCase
         $root = new Container();
         $root->getBinder('http')->bindSingleton(LoggerInterface::class, KVLogger::class);
 
-        $root->runScope(new Scope(), static function (Container $c1) {
+        $root->runScope(new Scope(), static function (Container $c1): void {
             $c1->runScope(
                 new Scope(name: 'http'),
                 static function (
                     ScopedProxyLoggerCarrier $carrier,
                     ScopedProxyLoggerCarrier $carrier2,
-                    LoggerInterface $logger
-                ) {
+                    LoggerInterface $logger,
+                ): void {
                     // from the current `foo` scope
                     self::assertInstanceOf(KVLogger::class, $logger);
 
@@ -100,7 +101,7 @@ final class ProxyTest extends BaseTestCase
                     // because of proxy
                     self::assertSame('kv', $carrier->logger->getName());
                     self::assertNotSame($carrier2->logger, $carrier->logger, 'Different contexts');
-                }
+                },
             );
         });
     }
@@ -110,10 +111,10 @@ final class ProxyTest extends BaseTestCase
         $root = new Container();
         $root->getBinder('foo')->bind(LoggerInterface::class, KVLogger::class);
 
-        $root->runScope(new Scope(), static function (Container $c1) {
+        $root->runScope(new Scope(), static function (Container $c1): void {
             $c1->runScope(
                 new Scope(name: 'foo'),
-                static function (ScopedProxyLoggerCarrier $carrier, LoggerInterface $logger) {
+                static function (ScopedProxyLoggerCarrier $carrier, LoggerInterface $logger): void {
                     // from the current `foo` scope
                     self::assertInstanceOf(KVLogger::class, $logger);
 
@@ -122,7 +123,7 @@ final class ProxyTest extends BaseTestCase
 
                     // because of proxy
                     self::assertSame('kv', $carrier->logger->getName());
-                }
+                },
             );
         });
     }
@@ -139,13 +140,13 @@ final class ProxyTest extends BaseTestCase
                         {
                             return new Context($context);
                         }
-                    }
-                )
+                    },
+                ),
             );
 
-        $root->runScope(new Scope(), static function (Container $c1) {
-            $c1->runScope(new Scope(name: 'foo'), static function (Container $c, ContextInterface $param) {
-                self::assertInstanceOf(ReflectionParameter::class, $param->value);
+        $root->runScope(new Scope(), static function (Container $c1): void {
+            $c1->runScope(new Scope(name: 'foo'), static function (Container $c, ContextInterface $param): void {
+                self::assertInstanceOf(\ReflectionParameter::class, $param->value);
                 self::assertSame('param', $param->value->getName());
 
                 $get = $c->get(ContextInterface::class);
@@ -158,9 +159,9 @@ final class ProxyTest extends BaseTestCase
                 $proxy = $c->get(ScopedProxyStdClass::class);
                 self::assertInstanceOf(ContextInterface::class, $proxy->getContext(), 'Context was resolved');
                 self::assertInstanceOf(
-                    ReflectionParameter::class,
+                    \ReflectionParameter::class,
                     $proxy->getContext()->getValue(),
-                    'Context was injected'
+                    'Context was injected',
                 );
                 /** @see ScopedProxyStdClass::$context */
                 self::assertSame('context', $proxy->getContext()->getValue()->getName());
@@ -180,21 +181,21 @@ final class ProxyTest extends BaseTestCase
                         {
                             return new Context($context);
                         }
-                    }
-                )
+                    },
+                ),
             );
 
         FiberHelper::runFiberSequence(
-            static fn() => $root->runScope(new Scope(name: 'foo'), static function (ContextInterface $ctx) {
+            static fn(): mixed => $root->runScope(new Scope(name: 'foo'), static function (ContextInterface $ctx): void {
                 for ($i = 0; $i < 10; $i++) {
-                    self::assertInstanceOf(ReflectionParameter::class, $ctx->getValue(), 'Context injected');
+                    self::assertInstanceOf(\ReflectionParameter::class, $ctx->getValue(), 'Context injected');
                     self::assertSame('ctx', $ctx->getValue()->getName());
                     \Fiber::suspend();
                 }
             }),
-            static fn() => $root->runScope(new Scope(name: 'foo'), static function (ContextInterface $context) {
+            static fn(): mixed => $root->runScope(new Scope(name: 'foo'), static function (ContextInterface $context): void {
                 for ($i = 0; $i < 10; $i++) {
-                    self::assertInstanceOf(ReflectionParameter::class, $context->getValue(), 'Context injected');
+                    self::assertInstanceOf(\ReflectionParameter::class, $context->getValue(), 'Context injected');
                     self::assertSame('context', $context->getValue()->getName());
                     \Fiber::suspend();
                 }
@@ -209,14 +210,14 @@ final class ProxyTest extends BaseTestCase
 
         $root->runScope(
             new Scope(),
-            static function (#[Proxy] ContainerInterface $cp) use ($root) {
-                $root->runScope(new Scope(name: 'http'), static function (ContainerInterface $c) use ($cp) {
+            static function (#[Proxy] ContainerInterface $cp) use ($root): void {
+                $root->runScope(new Scope(name: 'http'), static function (ContainerInterface $c) use ($cp): void {
                     self::assertNotSame($c, $cp);
                     self::assertSame($c, $cp->get(ContainerInterface::class));
                     self::assertInstanceOf(KVLogger::class, $cp->get(LoggerInterface::class));
                     self::assertSame($cp->get(LoggerInterface::class), $cp->get(LoggerInterface::class));
                 });
-            }
+            },
         );
     }
 
@@ -253,12 +254,11 @@ final class ProxyTest extends BaseTestCase
     public function testDestroyMethod(): void
     {
         $root = new Container();
-        $context = (object)['destroyed' => false];
+        $context = (object) ['destroyed' => false];
         $class = new class($context) implements DestroyableInterface {
             public function __construct(
                 private readonly \stdClass $context,
-            ) {
-            }
+            ) {}
 
             public function __destruct()
             {
@@ -267,8 +267,8 @@ final class ProxyTest extends BaseTestCase
         };
         $root->bindSingleton(DestroyableInterface::class, $class);
 
-        $proxy = $root->runScope(new Scope(), static fn(#[Proxy] DestroyableInterface $proxy) => $proxy);
-        $weak = WeakReference::create($proxy);
+        $proxy = $root->runScope(new Scope(), static fn(#[Proxy] DestroyableInterface $proxy): DestroyableInterface => $proxy);
+        $weak = \WeakReference::create($proxy);
         unset($proxy);
 
         self::assertNull($weak->get());
@@ -278,12 +278,12 @@ final class ProxyTest extends BaseTestCase
     public function testImplementationWithWiderTypes(): void
     {
         $root = new Container();
-        $root->getBinder('http')->bindSingleton(UserInterface::class, static fn () => new User('Foo'));
-        $proxy = $root->runScope(new Scope(), static fn(#[Proxy] UserInterface $proxy) => $proxy);
+        $root->getBinder('http')->bindSingleton(UserInterface::class, static fn(): User => new User('Foo'));
+        $proxy = $root->runScope(new Scope(), static fn(#[Proxy] UserInterface $proxy): UserInterface => $proxy);
 
         $root->runScope(
             new Scope('http'),
-            static function () use ($root, $proxy) {
+            static function () use ($proxy): void {
                 self::assertSame('Foo', $proxy->getName());
                 $proxy->setName(new class implements \Stringable {
                     public function __toString(): string
@@ -292,8 +292,156 @@ final class ProxyTest extends BaseTestCase
                     }
                 });
                 self::assertSame('Bar', $proxy->getName());
-            }
+            },
         );
+    }
+
+    /**
+     * Proxy gets a proxy of the same type.
+     */
+    public function testRecursiveProxyNotSingleton(): void
+    {
+        $root = new Container();
+        $root->bind(UserInterface::class, new ProxyConfig(UserInterface::class));
+
+        $this->expectException(RecursiveProxyException::class);
+        $this->expectExceptionMessage(
+            <<<MSG
+                Recursive proxy detected for `Spiral\Tests\Core\Scope\Stub\UserInterface`.
+                Binding scope: `root`.
+                Calling scope: `root.null`.
+                MSG,
+        );
+
+        $root->runScope(
+            new Scope(),
+            static fn(#[Proxy] UserInterface $user): string => $user->getName(),
+        );
+    }
+
+    /**
+     * Proxy gets a proxy of the same type as a singleton.
+     */
+    public function testRecursiveProxySingleton(): void
+    {
+        $root = new Container();
+        $root->bind(UserInterface::class, new ProxyConfig(UserInterface::class, singleton: true));
+
+        $this->expectException(RecursiveProxyException::class);
+        $this->expectExceptionMessage(
+            <<<MSG
+                Recursive proxy detected for `Spiral\Tests\Core\Scope\Stub\UserInterface`.
+                Calling scope: `root.null`.
+                MSG,
+        );
+
+        $root->runScope(
+            new Scope(),
+            static fn(#[Proxy] UserInterface $user): string => $user->getName(),
+        );
+    }
+
+    /**
+     * The {@see ContainerScope::runScope} ignores Container Proxy to avoid recursion.
+     */
+    public function testProxyIntoContainerScope(): void
+    {
+        $root = new Container();
+
+        $root->runScope(
+            new Scope(),
+            static function (#[Proxy] ContainerInterface $proxy, ContainerInterface $scoped): void {
+                self::assertNotSame($scoped, $proxy);
+                ContainerScope::runScope($proxy, static function (ContainerInterface $passed) use ($proxy, $scoped): void {
+                    self::assertNotSame($passed, $proxy);
+                    self::assertSame($scoped, ContainerScope::getContainer());
+                });
+            },
+        );
+    }
+
+    public function testProxyFallbackFactory(): void
+    {
+        $root = new Container();
+        $root->bind(UserInterface::class, new ProxyConfig(
+            interface: UserInterface::class,
+            fallbackFactory: static fn(): UserInterface => new User('Foo'),
+        ));
+
+        $name = $root->runScope(
+            new Scope(),
+            static fn(#[Proxy] UserInterface $user): string => $user->getName(),
+        );
+
+        self::assertSame('Foo', $name);
+    }
+
+    public function testHasAliasOutOfScopeWithoutFallback(): void
+    {
+        $root = new Container();
+        $root->bind('foo', new ProxyConfig(
+            interface: UserInterface::class,
+        ));
+
+        $result = $root->runScope(
+            new Scope(),
+            static fn(ContainerInterface $c): bool => $c->has('foo'),
+        );
+
+
+        self::assertFalse($result);
+    }
+
+    public function testHasOutOfScopeWithoutFallback(): void
+    {
+        $root = new Container();
+        $root->bind(UserInterface::class, new ProxyConfig(
+            interface: UserInterface::class,
+        ));
+
+        $result = $root->runScope(
+            new Scope(),
+            static fn(ContainerInterface $c): bool => $c->has(UserInterface::class),
+        );
+
+
+        self::assertFalse($result);
+    }
+
+    public function testHasOutOfScopeWithFallback(): void
+    {
+        $root = new Container();
+        $root->bind(UserInterface::class, new ProxyConfig(
+            interface: UserInterface::class,
+            fallbackFactory: static fn(): UserInterface => new User('Foo'),
+        ));
+
+        $result = $root->runScope(
+            new Scope(),
+            static fn(ContainerInterface $c): bool => $c->has(UserInterface::class),
+        );
+
+
+        self::assertTrue($result);
+    }
+
+    public function testHasOutOfScopeWithFallbackException(): void
+    {
+        $root = new Container();
+        $root->bind(UserInterface::class, new ProxyConfig(
+            interface: UserInterface::class,
+            fallbackFactory: static function (): never {
+                throw new \RuntimeException('Nope');
+            },
+        ));
+
+        $result = $root->runScope(
+            new Scope(),
+            static fn(ContainerInterface $c): bool => $c->has(UserInterface::class),
+        );
+
+
+        self::assertFalse($result);
     }
 
     /*

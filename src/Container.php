@@ -11,6 +11,7 @@ use Spiral\Core\Config\WeakReference;
 use Spiral\Core\Container\Autowire;
 use Spiral\Core\Container\InjectableInterface;
 use Spiral\Core\Container\SingletonInterface;
+use Spiral\Core\Exception\Binder\SingletonOverloadException;
 use Spiral\Core\Exception\Container\ContainerException;
 use Spiral\Core\Exception\LogicException;
 use Spiral\Core\Exception\Scope\FinalizersException;
@@ -53,6 +54,7 @@ final class Container implements
     private BinderInterface|Internal\Binder $binder;
     private InvokerInterface|Internal\Invoker $invoker;
     private Internal\Scope $scope;
+    private Internal\Actor $actor;
 
     /**
      * Container constructor.
@@ -84,19 +86,6 @@ final class Container implements
         ]);
     }
 
-    public function __destruct()
-    {
-        $this->closeScope();
-    }
-
-    /**
-     * Container can not be cloned.
-     */
-    public function __clone()
-    {
-        throw new LogicException('Container is not cloneable.');
-    }
-
     public function resolveArguments(
         ContextFunction $reflection,
         array $parameters = [],
@@ -121,7 +110,7 @@ final class Container implements
     {
         return ContainerScope::getContainer() === $this
             ? $this->factory->make($alias, $parameters, $context)
-            : ContainerScope::runScope($this, fn () => $this->factory->make($alias, $parameters, $context));
+            : ContainerScope::runScope($this, fn(): mixed => $this->factory->make($alias, $parameters, $context));
     }
 
     /**
@@ -147,7 +136,7 @@ final class Container implements
     {
         return ContainerScope::getContainer() === $this
             ? $this->container->get($id, $context)
-            : ContainerScope::runScope($this, fn () => $this->container->get($id, $context));
+            : ContainerScope::runScope($this, fn() => $this->container->get($id, $context));
     }
 
     public function has(string $id): bool
@@ -257,13 +246,15 @@ final class Container implements
      * Bind value resolver to container alias to be executed as cached. Resolver can be class name
      * (will be constructed only once), function array or Closure (executed only once call).
      *
+     * @param bool|null $force If the value is false, an exception will be thrown when attempting
+     *        to bind an already constructed singleton.
+     *        If the value is null, option {@see Options::$allowSingletonsRebinding} will be used.
      * @psalm-param TResolver $resolver
-     * @param bool $force If the value is false, an exception will be thrown when attempting
-     *  to bind an already constructed singleton.
+     * @throws SingletonOverloadException
      */
-    public function bindSingleton(string $alias, string|array|callable|object $resolver, bool $force = true): void
+    public function bindSingleton(string $alias, string|array|callable|object $resolver, ?bool $force = null): void
     {
-        if ($force) {
+        if ($force ?? $this->options->allowSingletonsRebinding) {
             $this->binder->removeBinding($alias);
         }
 
@@ -278,6 +269,14 @@ final class Container implements
         return $this->binder->hasInstance($alias);
     }
 
+    /**
+     * Check if the alias has is bound.
+     */
+    public function hasBinding(string $alias): bool
+    {
+        return $this->binder->hasBinding($alias);
+    }
+
     public function removeBinding(string $alias): void
     {
         $this->binder->removeBinding($alias);
@@ -290,7 +289,7 @@ final class Container implements
     {
         return ContainerScope::getContainer() === $this
             ? $this->invoker->invoke($target, $parameters)
-            : ContainerScope::runScope($this, fn () => $this->invoker->invoke($target, $parameters));
+            : ContainerScope::runScope($this, fn(): mixed => $this->invoker->invoke($target, $parameters));
     }
 
     /**
@@ -309,6 +308,19 @@ final class Container implements
     public function hasInjector(string $class): bool
     {
         return $this->binder->hasInjector($class);
+    }
+
+    /**
+     * Container can not be cloned.
+     */
+    public function __clone()
+    {
+        throw new LogicException('Container is not cloneable.');
+    }
+
+    public function __destruct()
+    {
+        $this->closeScope();
     }
 
     /**
@@ -389,7 +401,7 @@ final class Container implements
         $container = new self($this->config, $config->name, $this->options);
 
         // Configure scope
-        $container->scope->setParent($this, $this->scope, $this->factory);
+        $container->scope->setParent($this, $this->scope, $this->actor);
 
         // Add specific bindings
         foreach ($config->bindings as $alias => $resolver) {
@@ -406,7 +418,7 @@ final class Container implements
                 } finally {
                     $container->closeScope();
                 }
-            }
+            },
         );
     }
 }

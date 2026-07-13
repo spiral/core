@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Spiral\Core\Exception\Container;
 
 /**
- * Unable to resolve argument value.
+ * @deprecated
  */
 class ArgumentException extends AutowireException
 {
@@ -15,14 +15,18 @@ class ArgumentException extends AutowireException
      */
     public function __construct(
         protected \ReflectionParameter $parameter,
-        protected \ReflectionFunctionAbstract $context
+        protected \ReflectionFunctionAbstract $context,
+        ?\Throwable $previous = null,
     ) {
         $name = $context->getName();
         if ($context instanceof \ReflectionMethod) {
             $name = $context->class . '::' . $name;
         }
 
-        parent::__construct(\sprintf("Unable to resolve '%s' argument in '%s'", $parameter->name, $name));
+        parent::__construct(
+            \sprintf("Unable to resolve '%s' argument in '%s'", $parameter->name, $name),
+            previous: $previous,
+        );
     }
 
     public function getParameter(): \ReflectionParameter

@@ -18,9 +18,17 @@ final class Tracer implements \Stringable
      */
     private array $traces = [];
 
-    public function __toString(): string
+    /**
+     * @param Trace[][] $blocks
+     */
+    public static function renderTraceList(array $blocks): string
     {
-        return $this->traces === [] ? '' : "Container trace list:\n" . $this->renderTraceList($this->traces);
+        $result = [];
+        $i = 0;
+        foreach ($blocks as $block) {
+            \array_push($result, ...self::blockToStringList($block, $i++));
+        }
+        return \implode("\n", $result);
     }
 
     /**
@@ -29,6 +37,11 @@ final class Tracer implements \Stringable
     public function combineTraceMessage(string $header): string
     {
         return "$header\n$this";
+    }
+
+    public function getTraces(): array
+    {
+        return $this->traces;
     }
 
     public function push(bool $nextLevel, mixed ...$details): void
@@ -60,17 +73,9 @@ final class Tracer implements \Stringable
         return $this->traces[0][0]->alias ?? '';
     }
 
-    /**
-     * @param Trace[][] $blocks
-     */
-    private function renderTraceList(array $blocks): string
+    public function __toString(): string
     {
-        $result = [];
-        $i = 0;
-        foreach ($blocks as $block) {
-            \array_push($result, ...$this->blockToStringList($block, $i++));
-        }
-        return \implode("\n", $result);
+        return $this->traces === [] ? '' : "Resolving trace:\n" . self::renderTraceList($this->traces);
     }
 
     /**
@@ -79,7 +84,7 @@ final class Tracer implements \Stringable
      *
      * @return string[]
      */
-    private function blockToStringList(array $items, int $level = 0): array
+    private static function blockToStringList(array $items, int $level = 0): array
     {
         $result = [];
         $padding = \str_repeat('  ', $level);
@@ -88,7 +93,7 @@ final class Tracer implements \Stringable
         $s = "\n";
         $nexPrefix = "$s$padding  ";
         foreach ($items as $item) {
-            $result[] = $firstPrefix . \str_replace($s, $nexPrefix, (string)$item);
+            $result[] = $firstPrefix . \str_replace($s, $nexPrefix, (string) $item);
         }
         return $result;
     }

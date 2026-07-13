@@ -9,7 +9,8 @@ use Spiral\Core\Container\InjectorInterface;
 /**
  * Manages container bindings.
  *
- * @method BinderInterface getBinder(?string $scope = null)
+ * @method BinderInterface getBinder(string|\BackedEnum|null $scope = null)
+ * @method bool hasBinding(string $alias) Returns true if any type of binding exists.
  *
  * @psalm-type TResolver = class-string|non-empty-string|object|callable|array{class-string, non-empty-string}
  */

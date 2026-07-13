@@ -4,14 +4,20 @@ declare(strict_types=1);
 
 namespace Spiral\Core\Config;
 
+use Spiral\Core\Exception\Traits\ClosureRendererTrait;
+
 /**
  * Make a value using a closure.
  */
 final class Factory extends Binding
 {
-    use \Spiral\Core\Exception\Traits\ClosureRendererTrait;
+    use ClosureRendererTrait;
 
     public readonly \Closure $factory;
+
+    /** @var class-string|null */
+    private readonly ?string $returnClass;
+
     private readonly int $parametersCount;
     private ?string $definition;
 
@@ -20,7 +26,13 @@ final class Factory extends Binding
         public readonly bool $singleton = false,
     ) {
         $this->factory = $callable(...);
-        $this->parametersCount = (new \ReflectionFunction($this->factory))->getNumberOfParameters();
+        $reflection = new \ReflectionFunction($this->factory);
+        $this->parametersCount = $reflection->getNumberOfParameters();
+
+        // Detect the return type of the factory
+        $returnType = (string) $reflection->getReturnType();
+        $this->returnClass = \class_exists($returnType) ? $returnType : null;
+
         /** @psalm-suppress TypeDoesNotContainType */
         $this->definition = match (true) {
             \is_string($callable) => $callable,
@@ -34,6 +46,20 @@ final class Factory extends Binding
         };
     }
 
+    public function getParametersCount(): int
+    {
+        return $this->parametersCount;
+    }
+
+    /**
+     * @return class-string|null
+     * @internal
+     */
+    public function getReturnClass(): ?string
+    {
+        return $this->returnClass;
+    }
+
     public function __toString(): string
     {
         $this->definition ??= $this->renderClosureSignature(new \ReflectionFunction($this->factory));
@@ -42,10 +68,5 @@ final class Factory extends Binding
             'Factory from %s',
             $this->definition,
         );
-    }
-
-    public function getParametersCount(): int
-    {
-        return $this->parametersCount;
     }
 }

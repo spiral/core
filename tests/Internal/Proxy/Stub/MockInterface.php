@@ -8,6 +8,11 @@ use Spiral\Core\Internal\Proxy\ProxyTrait;
 
 interface MockInterface
 {
+    /**
+     * Mustn't be a part of the {@see ProxyTrait}
+     */
+    public static function resolve(): void;
+
     public function bar(string $name): void;
 
     public function baz(string $name, int $age): string;
@@ -26,8 +31,7 @@ interface MockInterface
 
     public function &same(string &$byLink): string;
 
-    /**
-     * Mustn't be a part of the {@see ProxyTrait}
-     */
-    public static function resolve(): void;
+    public function staticType(): static;
+
+    public function selfType(): self;
 }

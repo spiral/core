@@ -28,17 +28,18 @@ final class DeprecationProxy extends Proxy
 
     /**
      * @return class-string
+     * @deprecated
      */
     public function getInterface(): string
     {
         $message = $this->message ?? \sprintf(
             'Using `%s` outside of the `%s` scope is deprecated and will be impossible in version %s.',
             $this->interface,
-            $this->scope,
-            $this->version
+            $this->scope instanceof \BackedEnum ? $this->scope->value : $this->scope,
+            $this->version,
         );
 
-        @trigger_error($message, \E_USER_DEPRECATED);
+        @\trigger_error($message, \E_USER_DEPRECATED);
 
         return parent::getInterface();
     }

@@ -7,22 +7,19 @@ namespace Spiral\Tests\Core;
 use PHPUnit\Framework\TestCase;
 use Spiral\Core\Container;
 use Spiral\Core\Exception\Container\NotCallableException;
+use Spiral\Core\Exception\Container\NotFoundException;
 use Spiral\Core\Exception\Resolver\ArgumentResolvingException;
+use Spiral\Core\InvokerInterface;
+use Spiral\Core\Scope;
+use Spiral\Core\ScopeInterface;
 use Spiral\Tests\Core\Fixtures\Bucket;
+use Spiral\Tests\Core\Fixtures\PrivateConstructor;
 use Spiral\Tests\Core\Fixtures\SampleClass;
 use Spiral\Tests\Core\Fixtures\Storage;
 
-class InvokerTest extends TestCase
+final class InvokerTest extends TestCase
 {
-    /** @var Container */
-    private $container;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->container = new Container();
-    }
+    private Container $container;
 
     public function testCallValidCallableArray(): void
     {
@@ -31,10 +28,10 @@ class InvokerTest extends TestCase
 
         $result = $this->container->invoke([$object, 'makeBucket'], ['name' => 'bar']);
 
-        $this->assertSame($bucket, $result['bucket']);
-        $this->assertInstanceOf(SampleClass::class, $result['class']);
-        $this->assertSame('bar', $result['name']);
-        $this->assertSame('baz', $result['path']);
+        self::assertSame($bucket, $result['bucket']);
+        self::assertInstanceOf(SampleClass::class, $result['class']);
+        self::assertSame('bar', $result['name']);
+        self::assertSame('baz', $result['path']);
     }
 
     public function testCallValidCallableArrayWithClassResolving(): void
@@ -43,10 +40,10 @@ class InvokerTest extends TestCase
 
         $result = $this->container->invoke([Storage::class, 'makeBucket'], ['name' => 'bar']);
 
-        $this->assertSame($bucket, $result['bucket']);
-        $this->assertInstanceOf(SampleClass::class, $result['class']);
-        $this->assertSame('bar', $result['name']);
-        $this->assertSame('baz', $result['path']);
+        self::assertSame($bucket, $result['bucket']);
+        self::assertInstanceOf(SampleClass::class, $result['class']);
+        self::assertSame('bar', $result['name']);
+        self::assertSame('baz', $result['path']);
     }
 
     public function testCallValidCallableArrayWithResolvingFromContainer(): void
@@ -56,10 +53,10 @@ class InvokerTest extends TestCase
 
         $result = $this->container->invoke(['foo', 'makeBucket'], ['name' => 'bar']);
 
-        $this->assertSame($bucket, $result['bucket']);
-        $this->assertInstanceOf(SampleClass::class, $result['class']);
-        $this->assertSame('bar', $result['name']);
-        $this->assertSame('baz', $result['path']);
+        self::assertSame($bucket, $result['bucket']);
+        self::assertInstanceOf(SampleClass::class, $result['class']);
+        self::assertSame('bar', $result['name']);
+        self::assertSame('baz', $result['path']);
     }
 
     public function testCallValidCallableArrayWithNotResolvableDependencies(): void
@@ -74,12 +71,119 @@ class InvokerTest extends TestCase
     {
         $this->container->bindSingleton(Bucket::class, $bucket = new Bucket('foo'));
 
-        $result = $this->container->invoke(Storage::class.'::createBucket', ['name' => 'bar']);
+        $result = $this->container->invoke(Storage::class . '::createBucket', ['name' => 'bar']);
 
-        $this->assertSame($bucket, $result['bucket']);
-        $this->assertInstanceOf(SampleClass::class, $result['class']);
-        $this->assertSame('bar', $result['name']);
-        $this->assertSame('baz', $result['path']);
+        self::assertSame($bucket, $result['bucket']);
+        self::assertInstanceOf(SampleClass::class, $result['class']);
+        self::assertSame('bar', $result['name']);
+        self::assertSame('baz', $result['path']);
+    }
+
+    /**
+     * The Invoker must not instantiate the class when calling a static method.
+     * In this case, we don't make any bindings for the class.
+     */
+    public function testCallStaticMethodWithoutInstantiation(): void
+    {
+        // Keep the [class, method] array callable: this test verifies the Invoker resolves
+        // it without instantiating the class. Do not convert it to a first-class callable
+        // (PrivateConstructor::publicMethod(...)) — that bypasses the resolution path under test.
+        $result = $this->container->invoke([PrivateConstructor::class, 'publicMethod'], [42]);
+
+        self::assertSame(42, $result);
+    }
+
+    /**
+     * The Invoker must not instantiate the class when calling a static method.
+     * In this case, we make alias bindings for the class.
+     */
+    public function testCallStaticMethodWithoutInstantiationAliased(): void
+    {
+        $this->container->bind('foo', PrivateConstructor::class);
+        $result = $this->container->invoke(['foo', 'publicMethod'], [42]);
+
+        self::assertSame(42, $result);
+    }
+
+    /**
+     * The Invoker must not instantiate the class when calling a static method and find the binding in all the scopes
+     */
+    public function testCallStaticMethodWithoutInstantiationAliasedScoped(): void
+    {
+        $this->container->bind('alias', PrivateConstructor::class);
+
+        $result = $this->container->runScope(
+            new Scope('foo'),
+            static fn(ScopeInterface $c): mixed => $c->runScope(
+                new Scope('bar'),
+                static fn(InvokerInterface $i): mixed => $i->invoke(['alias', 'publicMethod'], [42]),
+            ),
+        );
+
+        self::assertSame(42, $result);
+    }
+
+    /**
+     * The Invoker must not instantiate the class when calling a static method.
+     * In this case, we make a typed factory binding for the class.
+     */
+    public function testCallStaticMethodWithoutInstantiationWithFactory(): void
+    {
+        $this->container->bind('foo', static fn(): PrivateConstructor => throw new \Exception('Should not be called'));
+        $result = $this->container->invoke(['foo', 'publicMethod'], [42]);
+
+        self::assertSame(42, $result);
+    }
+
+    /**
+     * The Invoker must instantiate the dependency if it cannot detect the return type.
+     */
+    public function testCallStaticMethodWithoutInstantiationWithUntypedFactory(): void
+    {
+        // Note: do not add a return type to the closure
+        $this->container->bind('foo', static fn() => throw new \Exception('Factory called'));
+
+        try {
+            $this->container->invoke(['foo', 'publicMethod'], [42]);
+            self::fail('Exception should be thrown');
+        } catch (\Throwable $e) {
+            self::assertInstanceOf(NotFoundException::class, $e);
+            self::assertNotNull($e->getPrevious());
+            self::assertStringContainsString('Factory called', $e->getPrevious()->getMessage());
+        }
+    }
+
+    /**
+     * The Invoker must instantiate the dependency if it cannot detect the return type.
+     */
+    public function testCallStaticMethodWithoutInstantiationWithOvertypedFactory(): void
+    {
+        $this->container->bind('foo', static fn(): PrivateConstructor|SampleClass => throw new \Exception('Factory called'));
+
+        try {
+            $this->container->invoke(['foo', 'publicMethod'], [42]);
+            self::fail('Exception should be thrown');
+        } catch (\Throwable $e) {
+            self::assertInstanceOf(NotFoundException::class, $e);
+            self::assertNotNull($e->getPrevious());
+            self::assertStringContainsString('Factory called', $e->getPrevious()->getMessage());
+        }
+    }
+
+    /**
+     * The Invoker must instantiate the dependency if it cannot detect the return type.
+     */
+    public function testCallStaticMethodWithoutInstantiationWithNullableTypedFactory(): void
+    {
+        $this->container->bind('foo', static fn(): ?PrivateConstructor => throw new \Exception('Factory called'));
+        try {
+            $this->container->invoke(['foo', 'publicMethod'], [42]);
+            self::fail('Exception should be thrown');
+        } catch (\Throwable $e) {
+            self::assertInstanceOf(NotFoundException::class, $e);
+            self::assertNotNull($e->getPrevious());
+            self::assertStringContainsString('Factory called', $e->getPrevious()->getMessage());
+        }
     }
 
     public function testCallValidCallableStringWithNotResolvableDependencies(): void
@@ -87,7 +191,7 @@ class InvokerTest extends TestCase
         $this->expectException(ArgumentResolvingException::class);
         $this->expectExceptionMessage('Unable to resolve required argument `name` when resolving');
 
-        $this->container->invoke(Storage::class.'::createBucket', ['name' => 'bar']);
+        $this->container->invoke(Storage::class . '::createBucket', ['name' => 'bar']);
     }
 
     public function testCallValidClosure(): void
@@ -95,16 +199,14 @@ class InvokerTest extends TestCase
         $this->container->bindSingleton(Bucket::class, $bucket = new Bucket('foo'));
 
         $result = $this->container->invoke(
-            static function (Bucket $bucket, SampleClass $class, string $name, string $path = 'baz') {
-                return \compact('bucket', 'class', 'name', 'path');
-            },
-            ['name' => 'bar']
+            static fn(Bucket $bucket, SampleClass $class, string $name, string $path = 'baz'): array => \compact('bucket', 'class', 'name', 'path'),
+            ['name' => 'bar'],
         );
 
-        $this->assertSame($bucket, $result['bucket']);
-        $this->assertInstanceOf(SampleClass::class, $result['class']);
-        $this->assertSame('bar', $result['name']);
-        $this->assertSame('baz', $result['path']);
+        self::assertSame($bucket, $result['bucket']);
+        self::assertInstanceOf(SampleClass::class, $result['class']);
+        self::assertSame('bar', $result['name']);
+        self::assertSame('baz', $result['path']);
     }
 
     public function testCallValidClosureWithNotResolvableDependencies(): void
@@ -113,10 +215,8 @@ class InvokerTest extends TestCase
         $this->expectExceptionMessage('Unable to resolve required argument `name` when resolving');
 
         $this->container->invoke(
-            static function (Bucket $bucket, SampleClass $class, string $name, string $path = 'baz') {
-                return \compact('bucket', 'class', 'name', 'path');
-            },
-            ['name' => 'bar']
+            static fn(Bucket $bucket, SampleClass $class, string $name, string $path = 'baz'): array => \compact('bucket', 'class', 'name', 'path'),
+            ['name' => 'bar'],
         );
     }
 
@@ -136,5 +236,12 @@ class InvokerTest extends TestCase
         $object = new Storage();
 
         $this->container->invoke([$object]);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->container = new Container();
     }
 }

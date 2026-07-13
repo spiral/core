@@ -10,7 +10,7 @@ namespace Spiral\Core\Config;
  */
 final class Inflector extends Binding
 {
-    private int $parametersCount;
+    private readonly int $parametersCount;
 
     /**
      * @param \Closure $inflector The first closure argument is the object to be manipulated.
@@ -22,13 +22,13 @@ final class Inflector extends Binding
         $this->parametersCount = (new \ReflectionFunction($inflector))->getNumberOfParameters();
     }
 
-    public function __toString(): string
-    {
-        return 'Inflector';
-    }
-
     public function getParametersCount(): int
     {
         return $this->parametersCount;
+    }
+
+    public function __toString(): string
+    {
+        return 'Inflector';
     }
 }
