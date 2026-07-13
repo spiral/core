@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Spiral\Tests\Core\Scope;
 
 use Fiber;
+use Generator;
 
 final class FiberHelper
 {
@@ -19,7 +20,7 @@ final class FiberHelper
      */
     public static function runInFiber(callable $callable, ?callable $check = null): mixed
     {
-        $fiber = new \Fiber($callable);
+        $fiber = new Fiber($callable);
         $value = $fiber->start();
         while (!$fiber->isTerminated()) {
             if ($check !== null) {
@@ -38,18 +39,20 @@ final class FiberHelper
     /**
      * Runs a sequence of callables in fibers asynchronously.
      *
+     * @param callable ...$callables
+     *
      * @return array The results of each callable.
      */
     public static function runFiberSequence(callable ...$callables): array
     {
-        /** @var array<array-key, \Generator<int, mixed, mixed, mixed>> $fiberGenerators */
+        /** @var array<array-key, Generator<int, mixed, mixed, mixed>> $fiberGenerators */
         $fiberGenerators = [];
         /** Values that were suspended by the fiber. */
         $suspends = [];
         $results = [];
         foreach ($callables as $key => $callable) {
             $fiberGenerators[$key] = (static function () use ($callable) {
-                $fiber = new \Fiber($callable);
+                $fiber = new Fiber($callable);
                 // Get ready
                 yield null;
 

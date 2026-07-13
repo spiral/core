@@ -21,7 +21,6 @@ final class Container implements ContainerInterface
     private State $state;
     private FactoryInterface|Factory $factory;
     private Scope $scope;
-    private Actor $actor;
 
     public function __construct(Registry $constructor)
     {
@@ -30,7 +29,6 @@ final class Container implements ContainerInterface
         $this->state = $constructor->get('state', State::class);
         $this->factory = $constructor->get('factory', FactoryInterface::class);
         $this->scope = $constructor->get('scope', Scope::class);
-        $this->actor = $constructor->get('actor', Actor::class);
     }
 
     /**
@@ -63,23 +61,12 @@ final class Container implements ContainerInterface
 
     public function has(string $id): bool
     {
-        $this->actor->resolveType($id, $binding, $singleton, $injector, $actor, false);
-
-        if ($singleton !== null || $injector !== null) {
+        if (\array_key_exists($id, $this->state->bindings) || \array_key_exists($id, $this->state->singletons)) {
             return true;
         }
 
-        if ($binding === null) {
-            return false;
-        }
+        $parent = $this->scope->getParent();
 
-        if ($binding instanceof \Spiral\Core\Config\Proxy) {
-            $type = $binding->getReturnClass();
-            return $id === $type
-                ? $binding->hasFactory()
-                : $this->has($type);
-        }
-
-        return true;
+        return $parent !== null && $parent->has($id);
     }
 }

@@ -7,4 +7,6 @@ namespace Spiral\Core\Exception\Container;
 /**
  * When class can not be created.
  */
-class AutowireException extends TracedContainerException {}
+class AutowireException extends ContainerException
+{
+}

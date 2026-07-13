@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\Core\Internal\Resolver;
 
+use DateTimeImmutable;
 use Spiral\Tests\Core\Stub\EngineInterface;
 use Spiral\Tests\Core\Stub\EngineMarkTwo;
 use Spiral\Tests\Core\Stub\EngineVAZ2101;
@@ -23,7 +24,7 @@ final class PositionArgumentTest extends BaseTestCase
 
         $result = $this->resolveClosure(
             static fn(EngineInterface $engine1, EngineInterface $engine2) => null,
-            [1 => ($engineB = new EngineZIL130())],
+            [1 => ($engineB = new EngineZIL130())]
         );
 
         $this->assertSame([$engineA, $engineB], $result);
@@ -32,8 +33,8 @@ final class PositionArgumentTest extends BaseTestCase
     public function testFirstIsOptionalSecondPassedAsArgument(): void
     {
         $result = $this->resolveClosure(
-            static fn(int $foo = 42, ?EngineInterface $engine2 = null) => null,
-            [1 => ($engineB = new EngineZIL130())],
+            static fn(int $foo = 42, EngineInterface $engine2 = null) => null,
+            [1 => ($engineB = new EngineZIL130())]
         );
 
         $this->assertSame([42, $engineB], $result);
@@ -43,7 +44,7 @@ final class PositionArgumentTest extends BaseTestCase
     {
         $result = $this->resolveClosure(
             static fn(array $arg) => null,
-            [['test']],
+            [['test']]
         );
 
         $this->assertSame([['test']], $result);
@@ -53,7 +54,7 @@ final class PositionArgumentTest extends BaseTestCase
     {
         $result = $this->resolveClosure(
             static fn(callable $callable) => null,
-            [$callable = static fn() => true],
+            [$callable = fn() => true]
         );
 
         $this->assertSame([$callable], $result);
@@ -63,7 +64,7 @@ final class PositionArgumentTest extends BaseTestCase
     {
         $result = $this->resolveClosure(
             static fn(iterable $arg) => null,
-            [$iterable = new \SplStack()],
+            [$iterable = new \SplStack()]
         );
 
         $this->assertSame([$iterable], $result); // todo arg as array
@@ -73,7 +74,7 @@ final class PositionArgumentTest extends BaseTestCase
     {
         $result = $this->resolveClosure(
             static fn() => null,
-            ['scalar'],
+            ['scalar']
         );
 
         $this->assertSame([], $result);
@@ -86,7 +87,7 @@ final class PositionArgumentTest extends BaseTestCase
     {
         $result = $this->resolveClosure(
             static fn(object $object) => null,
-            [$object = new \DateTimeImmutable()],
+            [$object = new DateTimeImmutable()]
         );
 
         $this->assertSame([$object], $result);
@@ -101,11 +102,11 @@ final class PositionArgumentTest extends BaseTestCase
             static fn(?EngineInterface $engine1, EngineInterface $engine2) => null,
             [
                 new EngineMarkTwo(),
-                new \DateTimeImmutable(),
-                new \DateTimeImmutable(),
+                new DateTimeImmutable(),
+                new DateTimeImmutable(),
                 new EngineVAZ2101(),
             ],
-            validate: false,
+            validate: false
         );
 
         $this->assertCount(2, $result);
@@ -120,11 +121,11 @@ final class PositionArgumentTest extends BaseTestCase
             static fn() => null,
             [
                 new EngineMarkTwo(),
-                new \DateTimeImmutable(),
-                new \DateTimeImmutable(),
+                new DateTimeImmutable(),
+                new DateTimeImmutable(),
                 new EngineVAZ2101(),
             ],
-            validate: false,
+            validate: false
         );
 
         $this->assertCount(0, $result);

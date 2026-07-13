@@ -12,7 +12,6 @@ use Spiral\Core\Config;
 use Spiral\Core\Container;
 use Spiral\Core\Exception\Container\ContainerException;
 use Spiral\Core\Scope;
-use Spiral\Tests\Core\Fixtures\ScopeEnum;
 use Spiral\Tests\Core\Internal\Proxy\Stub\EmptyInterface;
 use Spiral\Tests\Core\Internal\Proxy\Stub\MockInterface;
 use Spiral\Tests\Core\Internal\Proxy\Stub\MockInterfaceImpl;
@@ -26,13 +25,6 @@ final class ProxyTest extends TestCase
         // yield [EmptyInterface::class, 'empty'];
     }
 
-    public static function invalidDeprecationProxyArgsDataProvider(): \Traversable
-    {
-        yield [null, '4.0'];
-        yield ['foo', null];
-        yield [null, null];
-    }
-
     #[DataProvider('interfacesProvider')]
     public function testSimpleCases(string $interface, string $var): void
     {
@@ -42,8 +34,8 @@ final class ProxyTest extends TestCase
 
         $root->invoke(static function (
             #[Proxy] MockInterface $mock,
-            #[Proxy/*proxyOverloads: true*/] EmptyInterface $empty,
-        ) use ($var): void {
+            #[Proxy(/*proxyOverloads: true*/)] EmptyInterface $empty,
+        ) use ($var) {
             /** @var MockInterfaceImpl $proxy */
             $proxy = $$var;
             $proxy->bar(name: 'foo'); // Possible to run
@@ -60,7 +52,7 @@ final class ProxyTest extends TestCase
 
         self::expectExceptionMessageMatches('/Call to undefined method/i');
 
-        $root->invoke(static function (#[Proxy] EmptyInterface $proxy): void {
+        $root->invoke(static function (#[Proxy] EmptyInterface $proxy) {
             $proxy->bar(name: 'foo'); // Possible to run
         });
     }
@@ -74,8 +66,8 @@ final class ProxyTest extends TestCase
 
         $root->invoke(static function (
             #[Proxy] MockInterface $mock,
-            #[Proxy/*proxyOverloads: true*/] EmptyInterface $empty,
-        ) use ($var): void {
+            #[Proxy(/*proxyOverloads: true*/)] EmptyInterface $empty,
+        ) use ($var) {
             /** @var MockInterfaceImpl $proxy */
             $proxy = $$var;
             self::assertSame(['foo', 'bar', 'baz', 69], $proxy->extra('foo', 'bar', 'baz', 69));
@@ -94,8 +86,8 @@ final class ProxyTest extends TestCase
 
         $root->invoke(static function (
             #[Proxy] MockInterface $mock,
-            #[Proxy/*proxyOverloads: true*/] EmptyInterface $empty,
-        ) use ($var): void {
+            #[Proxy(/*proxyOverloads: true*/)] EmptyInterface $empty,
+        ) use ($var) {
             /** @var MockInterfaceImpl $proxy */
             $proxy = $$var;
             self::assertSame(['foo', 'bar', 'baz', 69], $proxy->extraVariadic('foo', 'bar', 'baz', 69));
@@ -110,14 +102,14 @@ final class ProxyTest extends TestCase
     public function testReference(string $interface, string $var): void
     {
         $interface === EmptyInterface::class && self::markTestSkipped(
-            'Impossible to pass reference using magic method __call()',
+            'Impossible to pass reference using magic method __call()'
         );
 
         $root = new Container();
         $root->bindSingleton(MockInterface::class, Stub\MockInterfaceImpl::class);
         $root->bindSingleton(EmptyInterface::class, Stub\MockInterfaceImpl::class);
 
-        $root->invoke(static function (#[Proxy] MockInterface $mock, #[Proxy] EmptyInterface $empty) use ($var): void {
+        $root->invoke(static function (#[Proxy] MockInterface $mock, #[Proxy] EmptyInterface $empty) use ($var) {
             /** @var MockInterfaceImpl $proxy */
             $proxy = $$var;
             $str = 'bar';
@@ -130,14 +122,14 @@ final class ProxyTest extends TestCase
     public function testReturnReference(string $interface, string $var): void
     {
         $interface === EmptyInterface::class && self::markTestSkipped(
-            'Impossible to return reference using magic method __call()',
+            'Impossible to return reference using magic method __call()'
         );
 
         $root = new Container();
         $root->bindSingleton(MockInterface::class, Stub\MockInterfaceImpl::class);
         $root->bindSingleton(EmptyInterface::class, Stub\MockInterfaceImpl::class);
 
-        $root->invoke(static function (#[Proxy] MockInterface $mock, #[Proxy] EmptyInterface $empty) use ($var): void {
+        $root->invoke(static function (#[Proxy] MockInterface $mock, #[Proxy] EmptyInterface $empty) use ($var) {
             /** @var MockInterfaceImpl $proxy */
             $proxy = $$var;
 
@@ -153,14 +145,14 @@ final class ProxyTest extends TestCase
     public function testReferenceVariadic(string $interface, string $var): void
     {
         $interface === EmptyInterface::class && self::markTestSkipped(
-            'Impossible to pass reference using magic method __call()',
+            'Impossible to pass reference using magic method __call()'
         );
 
         $root = new Container();
         $root->bindSingleton(MockInterface::class, Stub\MockInterfaceImpl::class);
         $root->bindSingleton(EmptyInterface::class, Stub\MockInterfaceImpl::class);
 
-        $root->invoke(static function (#[Proxy] MockInterface $mock, #[Proxy] EmptyInterface $empty) use ($var): void {
+        $root->invoke(static function (#[Proxy] MockInterface $mock, #[Proxy] EmptyInterface $empty) use ($var) {
             /** @var MockInterfaceImpl $proxy */
             $proxy = $$var;
             $str1 = 'bar';
@@ -201,7 +193,7 @@ final class ProxyTest extends TestCase
         $this->assertInstanceOf($interface, $proxy);
         $this->assertNotInstanceOf(MockInterfaceImpl::class, $proxy);
 
-        $root->runScope(new Scope('foo'), static function (Container $container) use ($interface, $proxy): void {
+        $root->runScope(new Scope('foo'), static function (Container $container) use ($interface, $proxy) {
             $proxy->bar(name: 'foo'); // Possible to run
             self::assertSame('foo', $proxy->baz('foo', 42));
             self::assertSame(123, $proxy->qux(age: 123));
@@ -240,7 +232,7 @@ final class ProxyTest extends TestCase
             self::assertSame(
                 \sprintf('Using `%s` outside of the `foo` scope is deprecated and will be ' .
                     'impossible in version 4.0.', $interface),
-                $error,
+                $error
             );
         });
 
@@ -251,7 +243,7 @@ final class ProxyTest extends TestCase
         $proxy = $root->get($interface);
         $this->assertInstanceOf($interface, $proxy);
 
-        $root->runScope(new Scope('foo'), static function () use ($proxy): void {
+        $root->runScope(new Scope('foo'), static function () use ($proxy) {
             $proxy->bar(name: 'foo'); // Possible to run
             self::assertSame('foo', $proxy->baz('foo', 42));
             self::assertSame(123, $proxy->qux(age: 123));
@@ -279,36 +271,7 @@ final class ProxyTest extends TestCase
         $proxy = $root->get($interface);
         $this->assertInstanceOf($interface, $proxy);
 
-        $root->runScope(new Scope('foo'), static function () use ($proxy): void {
-            $proxy->bar(name: 'foo'); // Possible to run
-            self::assertSame('foo', $proxy->baz('foo', 42));
-            self::assertSame(123, $proxy->qux(age: 123));
-            self::assertSame(69, $proxy->space(test age: 69));
-        });
-
-        \restore_error_handler();
-    }
-
-    #[DataProvider('interfacesProvider')]
-    #[WithoutErrorHandler]
-    public function testDeprecationProxyConfigWithEnumScope(string $interface): void
-    {
-        \set_error_handler(static function (int $errno, string $error) use ($interface): void {
-            self::assertSame(
-                \sprintf('Using `%s` outside of the `a` scope is deprecated and will be ' .
-                    'impossible in version 4.0.', $interface),
-                $error,
-            );
-        });
-
-        $root = new Container();
-        $root->getBinder('foo')->bindSingleton($interface, Stub\MockInterfaceImpl::class);
-        $root->bindSingleton($interface, new Config\DeprecationProxy($interface, true, ScopeEnum::A, '4.0'));
-
-        $proxy = $root->get($interface);
-        $this->assertInstanceOf($interface, $proxy);
-
-        $root->runScope(new Scope('foo'), static function () use ($proxy): void {
+        $root->runScope(new Scope('foo'), static function () use ($proxy) {
             $proxy->bar(name: 'foo'); // Possible to run
             self::assertSame('foo', $proxy->baz('foo', 42));
             self::assertSame(123, $proxy->qux(age: 123));
@@ -330,7 +293,7 @@ final class ProxyTest extends TestCase
         $root->getBinder('foo')->bindSingleton($interface, Stub\MockInterfaceImpl::class);
         $root->bindSingleton($interface, new Config\DeprecationProxy($interface, true, 'foo', '4.0'));
 
-        $root->runScope(new Scope('foo'), static function (Container $container) use ($interface): void {
+        $root->runScope(new Scope('foo'), static function (Container $container) use ($interface) {
             $proxy = $container->get($interface);
 
             $proxy->bar(name: 'foo'); // Possible to run
@@ -364,5 +327,12 @@ final class ProxyTest extends TestCase
         $this->expectExceptionMessage(\sprintf('Interface `%s` does not exist.', \stdClass::class));
 
         new Config\Proxy(\stdClass::class);
+    }
+
+    public static function invalidDeprecationProxyArgsDataProvider(): \Traversable
+    {
+        yield [null, '4.0'];
+        yield ['foo', null];
+        yield [null, null];
     }
 }

@@ -48,7 +48,7 @@ final class ProxyClassRenderer
             }
 
             $hasRefs = false;
-            $return = $method->hasReturnType() && (string) $method->getReturnType() === 'void' ? '' : 'return ';
+            $return = $method->hasReturnType() && (string)$method->getReturnType() === 'void' ? '' : 'return ';
             $call = ($method->isStatic() ? '::' : '->') . $method->getName();
             $context = $method->isStatic() ? 'null' : '$this->__container_proxy_context';
             $containerStr = match (false) {
@@ -79,7 +79,7 @@ final class ProxyClassRenderer
                     $method,
                     <<<PHP
                     {$return}{$resolveStr}{$call}(...\\func_get_args());
-                PHP,
+                PHP
                 );
                 continue;
             }
@@ -91,7 +91,7 @@ final class ProxyClassRenderer
                     $method,
                     <<<PHP
                     {$return}{$resolveStr}{$call}($argsStr);
-                PHP,
+                PHP
                 );
                 continue;
             }
@@ -101,14 +101,14 @@ final class ProxyClassRenderer
                 $method,
                 <<<PHP
                 {$return}{$resolveStr}{$call}($argsStr, ...\\array_slice(\\func_get_args(), {$countParams}));
-            PHP,
+            PHP
             );
         }
         $bodyStr = \implode("\n\n", $classBody);
 
         $traitsStr = $traits === [] ? '' : \implode(
             "\n    ",
-            \array_map(static fn(string $trait): string => 'use \\' . \ltrim($trait, '\\') . ';', $traits),
+            \array_map(fn (string $trait): string => 'use \\' . \ltrim($trait, '\\') . ';', $traits)
         );
         return <<<PHP
             $classNamespaceStr
@@ -129,7 +129,7 @@ final class ProxyClassRenderer
             $m->isStatic() ? ' static' : '',
             $m->returnsReference() ? '&' : '',
             $m->getName(),
-            \implode(', ', \array_map(self::renderParameter(...), $m->getParameters())),
+            \implode(', ', \array_map([self::class, 'renderParameter'], $m->getParameters())),
             $m->hasReturnType()
                 ? ': ' . self::renderParameterTypes($m->getReturnType(), $m->getDeclaringClass())
                 : '',
@@ -148,7 +148,7 @@ final class ProxyClassRenderer
                 '$' . $param->getName(),
                 $param->isOptional() && !$param->isVariadic() ? ' = ' . self::renderDefaultValue($param) : '',
             ),
-            ' ',
+            ' '
         );
     }
 
@@ -181,7 +181,7 @@ final class ProxyClassRenderer
         if ($param->isDefaultValueConstant()) {
             $result = $param->getDefaultValueConstantName();
 
-            return \explode('::', (string) $result)[0] === 'self'
+            return \explode('::', $result)[0] === 'self'
                 ? $result
                 : '\\' . $result;
         }
@@ -195,16 +195,12 @@ final class ProxyClassRenderer
 
     public static function normalizeClassType(\ReflectionNamedType $type, \ReflectionClass $class): string
     {
-        return match ($type->getName()) {
-            'static' => 'static',
-            'self' => '\\' . $class->getName(),
-            default => '\\' . $type->getName(),
-        };
+        return '\\' . ($type->getName() === 'self' ? $class->getName() : $type->getName());
     }
 
     private static function cutDefaultValue(\ReflectionParameter $param): string
     {
-        $string = (string) $param;
+        $string = (string)$param;
 
         return \trim(\substr($string, \strpos($string, '=') + 1, -1));
     }

@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\Core\Internal\Resolver;
 
-use Spiral\Core\Exception\Container\NotFoundException;
+use DateTimeInterface;
+use RuntimeException;
 use Spiral\Tests\Core\Stub\EngineInterface;
 use Spiral\Tests\Core\Stub\EngineMarkTwo;
 
@@ -73,7 +74,7 @@ final class NullableParameterTest extends BaseTestCase
     {
         $result = $this->resolveClosure(
             static fn(?string $param = 'scalar') => $param,
-            ['param' => null],
+            ['param' => null]
         );
 
         $this->assertSame([null], $result);
@@ -82,7 +83,7 @@ final class NullableParameterTest extends BaseTestCase
     public function testNullableUnionDefaultScalar(): void
     {
         $result = $this->resolveClosure(
-            static fn(null|int|string $param = 42) => $param,
+            static fn(null|int|string $param = 42) => $param
         );
 
         $this->assertSame([42], $result);
@@ -90,10 +91,10 @@ final class NullableParameterTest extends BaseTestCase
 
     public function testNullableClassThatCreatedWithFail(): void
     {
-        $this->bind(\DateTimeInterface::class, static fn() => throw new \RuntimeException('fail!'));
+        $this->bind(DateTimeInterface::class, fn () => throw new RuntimeException('fail!'));
 
         $result = $this->resolveClosure(
-            static fn(?\DateTimeInterface $param) => $param,
+            static fn(?DateTimeInterface $param) => $param
         );
 
         $this->assertSame([null], $result);
@@ -101,16 +102,13 @@ final class NullableParameterTest extends BaseTestCase
 
     public function testNotNullableClassThatCreatedWithFail(): void
     {
-        $this->bind(\DateTimeInterface::class, static fn() => throw new \RuntimeException('fail!'));
+        $this->bind(DateTimeInterface::class, fn () => throw new RuntimeException('fail!'));
 
-        try {
-            $this->resolveClosure(
-                static fn(\DateTimeInterface $param) => $param,
-            );
-            self::fail('Exception should be thrown');
-        } catch (NotFoundException $e) {
-            self::assertNotNull($e->getPrevious());
-            self::assertStringContainsString('fail!', $e->getPrevious()->getMessage());
-        }
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('fail!');
+
+        $this->resolveClosure(
+            static fn(DateTimeInterface $param) => $param
+        );
     }
 }

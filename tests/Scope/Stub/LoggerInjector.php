@@ -13,7 +13,8 @@ final class LoggerInjector implements InjectorInterface
 {
     public function __construct(
         private LoggerInterface $logger,
-    ) {}
+    ) {
+    }
 
     public function createInjection(\ReflectionClass $class, ?string $context = null): LoggerInterface
     {

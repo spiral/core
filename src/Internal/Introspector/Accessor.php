@@ -31,11 +31,11 @@ final class Accessor
 {
     public function __construct(
         public PublicContainer $publicContainer,
-    ) {}
+    ) {
+    }
 
     public function __get(string $name): object
     {
-        return (static fn(PublicContainer $c): object => $c->$name)
-            ->bindTo(null, $this->publicContainer)($this->publicContainer);
+        return (fn (PublicContainer $c): object => $c->$name)->call($this->publicContainer, $this->publicContainer);
     }
 }

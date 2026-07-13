@@ -13,34 +13,36 @@ use Spiral\Core\Exception\RuntimeException;
 use Spiral\Tests\Core\Fixtures\Bucket;
 use Spiral\Tests\Core\Fixtures\SampleClass;
 
-final class ScopesTest extends TestCase
+class ScopesTest extends TestCase
 {
     public function testScope(): void
     {
-        $container = $this->createStub(ContainerInterface::class);
+        $container = $this->createMock(ContainerInterface::class);
 
-        self::assertNull(ContainerScope::getContainer());
+        $this->assertNull(ContainerScope::getContainer());
 
-        self::assertTrue(ContainerScope::runScope($container, static fn(): bool => $container === ContainerScope::getContainer()));
+        $this->assertTrue(ContainerScope::runScope($container, function () use ($container) {
+            return $container === ContainerScope::getContainer();
+        }));
 
-        self::assertNull(ContainerScope::getContainer());
+        $this->assertNull(ContainerScope::getContainer());
     }
 
     public function testScopeException(): void
     {
-        $container = $this->createStub(ContainerInterface::class);
+        $container = $this->createMock(ContainerInterface::class);
 
-        self::assertNull(ContainerScope::getContainer());
+        $this->assertNull(ContainerScope::getContainer());
 
         try {
-            self::assertTrue(ContainerScope::runScope($container, static function (): never {
+            $this->assertTrue(ContainerScope::runScope($container, function () use ($container): void {
                 throw new RuntimeException('exception');
             }));
         } catch (\Throwable $e) {
         }
 
-        self::assertInstanceOf(RuntimeException::class, $e);
-        self::assertNull(ContainerScope::getContainer());
+        $this->assertInstanceOf(RuntimeException::class, $e);
+        $this->assertNull(ContainerScope::getContainer());
     }
 
     public function testContainerScope(): void
@@ -48,21 +50,21 @@ final class ScopesTest extends TestCase
         $c = new Container();
         $c->bind('bucket', new Bucket('a'));
 
-        self::assertSame('a', $c->get('bucket')->getName());
-        self::assertFalse($c->has('other'));
+        $this->assertSame('a', $c->get('bucket')->getName());
+        $this->assertFalse($c->has('other'));
 
-        self::assertTrue($c->runScope([
+        $this->assertTrue($c->runScope([
             'bucket' => new Bucket('b'),
-            'other'  => new SampleClass(),
-        ], static function ($c): bool {
-            self::assertSame('b', $c->get('bucket')->getName());
-            self::assertTrue($c->has('other'));
+            'other'  => new SampleClass()
+        ], function ($c) {
+            $this->assertSame('b', $c->get('bucket')->getName());
+            $this->assertTrue($c->has('other'));
 
             return $c->get('bucket')->getName() == 'b' && $c->has('other');
         }));
 
-        self::assertSame('a', $c->get('bucket')->getName());
-        self::assertFalse($c->has('other'));
+        $this->assertSame('a', $c->get('bucket')->getName());
+        $this->assertFalse($c->has('other'));
     }
 
     public function testContainerScopeException(): void
@@ -70,48 +72,47 @@ final class ScopesTest extends TestCase
         $c = new Container();
         $c->bind('bucket', new Bucket('a'));
 
-        self::assertSame('a', $c->get('bucket')->getName());
-        self::assertFalse($c->has('other'));
+        $this->assertSame('a', $c->get('bucket')->getName());
+        $this->assertFalse($c->has('other'));
 
-        self::assertTrue($c->runScope([
+        $this->assertTrue($c->runScope([
             'bucket' => new Bucket('b'),
-            'other'  => new SampleClass(),
-        ], static function ($c): bool {
-            self::assertSame('b', $c->get('bucket')->getName());
-            self::assertTrue($c->has('other'));
+            'other'  => new SampleClass()
+        ], function ($c) {
+            $this->assertSame('b', $c->get('bucket')->getName());
+            $this->assertTrue($c->has('other'));
 
             return $c->get('bucket')->getName() == 'b' && $c->has('other');
         }));
 
         try {
-            self::assertTrue($c->runScope([
+            $this->assertTrue($c->runScope([
                 'bucket' => new Bucket('b'),
-                'other'  => new SampleClass(),
-            ], static function (): never {
+                'other'  => new SampleClass()
+            ], function () use ($c): void {
                 throw new RuntimeException('exception');
             }));
-        } catch (\Throwable) {
+        } catch (\Throwable $e) {
         }
 
-        self::assertSame('a', $c->get('bucket')->getName());
-        self::assertFalse($c->has('other'));
+        $this->assertSame('a', $c->get('bucket')->getName());
+        $this->assertFalse($c->has('other'));
     }
 
     public function testContainerInScope(): void
     {
         $container = new Container();
 
-        self::assertSame($container, ContainerScope::runScope($container, static fn(ContainerInterface $container): \Psr\Container\ContainerInterface => $container));
-
-        $result = ContainerScope::runScope(
+        $this->assertSame(
             $container,
-            static fn(Container $container): mixed => $container->runScope(
-                [],
-                static fn(Container $container): \Spiral\Core\Container => $container,
-            ),
+            ContainerScope::runScope($container, static fn (ContainerInterface $container) => $container)
         );
 
-        self::assertSame($container, $result);
+        $result = ContainerScope::runScope($container, static function (Container $container) {
+            return $container->runScope([], static fn (Container $container) => $container);
+        });
+
+        $this->assertSame($container, $result);
     }
 
     public function testSingletonRebindingInScope(): void
@@ -119,17 +120,17 @@ final class ScopesTest extends TestCase
         $c = new Container();
         $c->bindSingleton('bucket', new Container\Autowire(Bucket::class, ['a']));
 
-        self::assertSame('a', $c->get('bucket')->getName());
+        $this->assertSame('a', $c->get('bucket')->getName());
 
-        self::assertTrue($c->runScope([
+        $this->assertTrue($c->runScope([
             'bucket' => new Bucket('b'),
-        ], static function ($c): bool {
-            self::assertSame('b', $c->get('bucket')->getName());
+        ], function ($c): bool {
+            $this->assertSame('b', $c->get('bucket')->getName());
 
             return $c->get('bucket')->getName() === 'b';
         }));
 
-        self::assertSame('a', $c->get('bucket')->getName());
+        $this->assertSame('a', $c->get('bucket')->getName());
     }
 
     public function testHasInstanceAfterMakeWithoutAliasInScope(): void
@@ -138,8 +139,8 @@ final class ScopesTest extends TestCase
         $container->bindSingleton('test', new #[Singleton] class {});
         $container->make('test');
 
-        $container->runScoped(static function (Container $container): void {
-            self::assertTrue($container->hasInstance('test'));
+        $container->runScoped(function (Container $container) {
+            $this->assertTrue($container->hasInstance('test'));
         });
     }
 
@@ -149,8 +150,8 @@ final class ScopesTest extends TestCase
         $container->bindSingleton('test', SampleClass::class);
         $container->make('test');
 
-        $container->runScoped(static function (Container $container): void {
-            self::assertTrue($container->hasInstance('test'));
+        $container->runScoped(function (Container $container) {
+            $this->assertTrue($container->hasInstance('test'));
         });
     }
 
@@ -164,8 +165,8 @@ final class ScopesTest extends TestCase
         $container->bindSingleton('bar', 'foo');
         $container->make('bar');
 
-        $container->runScoped(static function (Container $container): void {
-            self::assertTrue($container->hasInstance('bar'));
+        $container->runScoped(function (Container $container) {
+            $this->assertTrue($container->hasInstance('bar'));
         });
     }
 }

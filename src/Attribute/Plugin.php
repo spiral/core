@@ -7,4 +7,6 @@ namespace Spiral\Core\Attribute;
 /**
  * @internal
  */
-interface Plugin {}
+interface Plugin
+{
+}

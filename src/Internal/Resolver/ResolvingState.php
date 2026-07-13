@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Spiral\Core\Internal\Resolver;
 
+use ReflectionFunctionAbstract;
+use ReflectionParameter;
 use Spiral\Core\Exception\Resolver\ResolvingException;
 
 /**
@@ -19,13 +21,13 @@ final class ResolvingState
     private array $resolvedValues = [];
 
     public function __construct(
-        public readonly \ReflectionFunctionAbstract $reflection,
+        public readonly ReflectionFunctionAbstract $reflection,
         private array $arguments,
     ) {
         $this->modeNamed = $this->isNamedMode();
     }
 
-    public function addResolvedValue(mixed &$value, ?string $key = null): void
+    public function addResolvedValue(mixed &$value, string $key = null): void
     {
         if ($key === null) {
             $this->resolvedValues[] = &$value;
@@ -34,7 +36,7 @@ final class ResolvingState
         }
     }
 
-    public function resolveParameterByNameOrPosition(\ReflectionParameter $parameter, bool $variadic): array
+    public function resolveParameterByNameOrPosition(ReflectionParameter $parameter, bool $variadic): array
     {
         $key = $this->modeNamed
             ? $parameter->getName()
@@ -52,7 +54,7 @@ final class ResolvingState
             foreach ($_val as $key => &$item) {
                 if (!$positional && \is_int($key)) {
                     throw new ResolvingException(
-                        'Cannot use positional argument after named argument during unpacking named variadic argument.',
+                        'Cannot use positional argument after named argument during unpacking named variadic argument.'
                     );
                 }
                 $positional = $positional && \is_int($key);
@@ -88,8 +90,8 @@ final class ResolvingState
             $nums === 0 => true,
             $strings === 0 => false,
             default => throw new ResolvingException(
-                'You can not use both numeric and string keys for predefined arguments.',
-            ),
+                'You can not use both numeric and string keys for predefined arguments.'
+            )
         };
     }
 }

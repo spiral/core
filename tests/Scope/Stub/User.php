@@ -8,7 +8,8 @@ final class User implements UserInterface
 {
     public function __construct(
         private string $name,
-    ) {}
+    ) {
+    }
 
     public function setName(string|\Stringable $name): void
     {

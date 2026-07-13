@@ -4,13 +4,22 @@ declare(strict_types=1);
 
 namespace Spiral\Core\Exception\Resolver;
 
+use Spiral\Core\Exception\Traits\ClosureRendererTrait;
+
 final class UnknownParameterException extends ValidationException
 {
-    protected function getValidationMessage(
+    use ClosureRendererTrait;
+
+    public function __construct(
         \ReflectionFunctionAbstract $reflection,
-        string $parameter,
-    ): string {
+        private readonly string $parameter
+    ) {
         $pattern = "Unknown named parameter `{$parameter}` `%s` %s.";
-        return $this->renderFunctionAndParameter($reflection, $pattern);
+        parent::__construct($this->renderFunctionAndParameter($reflection, $pattern));
+    }
+
+    public function getParameter(): string
+    {
+        return $this->parameter;
     }
 }

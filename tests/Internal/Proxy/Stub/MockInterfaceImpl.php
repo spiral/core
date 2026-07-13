@@ -6,9 +6,9 @@ namespace Spiral\Tests\Core\Internal\Proxy\Stub;
 
 final class MockInterfaceImpl implements MockInterface, EmptyInterface
 {
-    public static function resolve(): void {}
-
-    public function bar(string $name): void {}
+    public function bar(string $name): void
+    {
+    }
 
     public function baz(string $name, int $age): string
     {
@@ -56,13 +56,7 @@ final class MockInterfaceImpl implements MockInterface, EmptyInterface
         return $byLink;
     }
 
-    public function staticType(): static
+    public static function resolve(): void
     {
-        return $this;
-    }
-
-    public function selfType(): MockInterface
-    {
-        return $this;
     }
 }

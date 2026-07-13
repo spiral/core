@@ -8,5 +8,6 @@ final class LoggerCarrier
 {
     public function __construct(
         public LoggerInterface $logger,
-    ) {}
+    ) {
+    }
 }

@@ -8,6 +8,10 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use ReflectionFunctionAbstract as ContextFunction;
+use ReflectionIntersectionType;
+use ReflectionNamedType;
+use ReflectionParameter;
+use ReflectionUnionType;
 use Spiral\Core\Attribute\Proxy as ProxyAttribute;
 use Spiral\Core\Container\Autowire;
 use Spiral\Core\Exception\Resolver\ArgumentResolvingException;
@@ -22,6 +26,7 @@ use Spiral\Core\Internal\Common\DestructorTrait;
 use Spiral\Core\Internal\Common\Registry;
 use Spiral\Core\Internal\Resolver\ResolvingState;
 use Spiral\Core\ResolverInterface;
+use Throwable;
 
 /**
  * @internal
@@ -51,7 +56,7 @@ final class Resolver implements ResolverInterface
         foreach ($reflection->getParameters() as $parameter) {
             $this->resolveParameter($parameter, $state, $validate)
             or
-            throw ArgumentResolvingException::createWithParam($reflection, $parameter->getName());
+            throw new ArgumentResolvingException($reflection, $parameter->getName());
         }
 
         return $state->getResolvedValues();
@@ -74,7 +79,7 @@ final class Resolver implements ResolverInterface
             // For a variadic parameter it's no sense - named or positional argument will be sent
             // But you can't send positional argument after named in any case
             if (\is_int($key) && !$positional) {
-                throw PositionalArgumentException::createWithParam($reflection, (string) $key);
+                throw new PositionalArgumentException($reflection, $key);
             }
 
             $positional = $positional && \is_int($key);
@@ -85,7 +90,7 @@ final class Resolver implements ResolverInterface
             }
 
             if ($parameter === null) {
-                throw UnknownParameterException::createWithParam($reflection, (string) $key);
+                throw new UnknownParameterException($reflection, $key);
             }
             $name = $parameter->getName();
 
@@ -96,19 +101,19 @@ final class Resolver implements ResolverInterface
                 if ($parameter->isOptional()) {
                     continue;
                 }
-                throw MissingRequiredArgumentException::createWithParam($reflection, $name);
+                throw new MissingRequiredArgumentException($reflection, $name);
             } else {
                 $value = &$arguments[$name];
                 unset($arguments[$name]);
             }
 
             if (!$this->validateValueToParameter($parameter, $value)) {
-                throw InvalidArgumentException::createWithParam($reflection, $name);
+                throw new InvalidArgumentException($reflection, $name);
             }
         }
     }
 
-    private function validateValueToParameter(\ReflectionParameter $parameter, mixed $value): bool
+    private function validateValueToParameter(ReflectionParameter $parameter, mixed $value): bool
     {
         if (!$parameter->hasType() || ($parameter->allowsNull() && $value === null)) {
             return true;
@@ -116,13 +121,13 @@ final class Resolver implements ResolverInterface
         $type = $parameter->getType();
 
         [$or, $types] = match (true) {
-            $type instanceof \ReflectionNamedType => [true, [$type]],
-            $type instanceof \ReflectionUnionType => [true, $type->getTypes()],
-            $type instanceof \ReflectionIntersectionType => [false, $type->getTypes()],
+            $type instanceof ReflectionNamedType => [true, [$type]],
+            $type instanceof ReflectionUnionType => [true, $type->getTypes()],
+            $type instanceof ReflectionIntersectionType => [false, $type->getTypes()],
         };
 
         foreach ($types as $t) {
-            \assert($t instanceof \ReflectionNamedType);
+            \assert($t instanceof ReflectionNamedType);
             if (!$this->validateValueNamedType($t, $value)) {
                 // If it is TypeIntersection
                 if ($or) {
@@ -142,7 +147,7 @@ final class Resolver implements ResolverInterface
      * Validate the value have the same type that in the $type.
      * This method doesn't resolve cases with nullable type and {@see null} value.
      */
-    private function validateValueNamedType(\ReflectionNamedType $type, mixed $value): bool
+    private function validateValueNamedType(ReflectionNamedType $type, mixed $value): bool
     {
         $name = $type->getName();
 
@@ -172,7 +177,7 @@ final class Resolver implements ResolverInterface
      * @throws ResolvingException
      * @throws NotFoundExceptionInterface|ContainerExceptionInterface
      */
-    private function resolveParameter(\ReflectionParameter $param, ResolvingState $state, bool $validate): bool
+    private function resolveParameter(ReflectionParameter $param, ResolvingState $state, bool $validate): bool
     {
         $isVariadic = $param->isVariadic();
         $hasType = $param->hasType();
@@ -194,10 +199,10 @@ final class Resolver implements ResolverInterface
 
         $error = null;
         while ($hasType) {
-            /** @var \ReflectionIntersectionType|\ReflectionUnionType|\ReflectionNamedType $refType */
+            /** @var ReflectionIntersectionType|ReflectionUnionType|ReflectionNamedType $refType */
             $refType = $param->getType();
 
-            if ($refType::class === \ReflectionNamedType::class) {
+            if ($refType::class === ReflectionNamedType::class) {
                 if ($refType->isBuiltin()) {
                     break;
                 }
@@ -208,7 +213,7 @@ final class Resolver implements ResolverInterface
                     $proxy = Proxy::create(
                         new \ReflectionClass($refType->getName()),
                         $param,
-                        $attrs[0]->newInstance(),
+                        $attrs[0]->newInstance()
                     );
                     $this->processArgument($state, $proxy);
                     return true;
@@ -218,19 +223,19 @@ final class Resolver implements ResolverInterface
                     if ($this->resolveObject($state, $refType, $param, $validate)) {
                         return true;
                     }
-                } catch (\Throwable $e) {
+                } catch (Throwable $e) {
                     $error = $e;
                 }
                 break;
             }
 
-            if ($refType::class === \ReflectionUnionType::class) {
+            if ($refType::class === ReflectionUnionType::class) {
                 foreach ($refType->getTypes() as $namedType) {
                     try {
                         if (!$namedType->isBuiltin() && $this->resolveObject($state, $namedType, $param, $validate)) {
                             return true;
                         }
-                    } catch (\Throwable $e) {
+                    } catch (Throwable $e) {
                         $error = $e;
                     }
                 }
@@ -268,8 +273,8 @@ final class Resolver implements ResolverInterface
      */
     private function resolveObject(
         ResolvingState $state,
-        \ReflectionNamedType $type,
-        \ReflectionParameter $parameter,
+        ReflectionNamedType $type,
+        ReflectionParameter $parameter,
         bool $validateWith = false,
     ): bool {
         /** @psalm-suppress TooManyArguments */
@@ -282,15 +287,15 @@ final class Resolver implements ResolverInterface
      * Arguments processing. {@see Autowire} object will be resolved.
      *
      * @param mixed $value Resolved value.
-     * @param \ReflectionParameter|null $validateWith Should be passed when the value should be validated.
+     * @param ReflectionParameter|null $validateWith Should be passed when the value should be validated.
      *        Must be set for when value is user's argument.
      * @param int|string|null $key Only {@see string} values will be preserved.
      */
     private function processArgument(
         ResolvingState $state,
         mixed &$value,
-        ?\ReflectionParameter $validateWith = null,
-        int|string|null $key = null,
+        ReflectionParameter $validateWith = null,
+        int|string $key = null
     ): void {
         // Resolve Autowire objects
         if ($value instanceof Autowire) {
@@ -299,9 +304,9 @@ final class Resolver implements ResolverInterface
 
         // Validation
         if ($validateWith !== null && !$this->validateValueToParameter($validateWith, $value)) {
-            throw InvalidArgumentException::createWithParam(
+            throw new InvalidArgumentException(
                 $validateWith->getDeclaringFunction(),
-                $validateWith->getName(),
+                $validateWith->getName()
             );
         }
 

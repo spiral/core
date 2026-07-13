@@ -9,14 +9,15 @@ use Spiral\Tests\Core\Stub\EngineMarkTwo;
 use Spiral\Tests\Core\Stub\EngineVAZ2101;
 use Spiral\Tests\Core\Stub\EngineZIL130;
 use Spiral\Tests\Core\Stub\MadeInUssrInterface;
+use stdClass;
 
 final class TypeIntersectionParameterTest extends BaseTestCase
 {
     public function testTypeIntersectionParameterAndUnnamedArgument(): void
     {
         $result = $this->resolveClosure(
-            static fn(EngineInterface&MadeInUssrInterface $engines) => $engines,
-            $args = [new EngineZIL130()],
+            fn(EngineInterface&MadeInUssrInterface $engines) => $engines,
+            $args = [new EngineZIL130()]
         );
 
         $this->assertSame($args, $result);
@@ -28,9 +29,9 @@ final class TypeIntersectionParameterTest extends BaseTestCase
     public function testVariadicTypeIntersectionParameterAndUnnamedArguments(): void
     {
         $result = $this->resolveClosure(
-            static fn(EngineInterface&MadeInUssrInterface ...$engines) => $engines,
-            [[new EngineZIL130(), new EngineVAZ2101(), new \stdClass(), new EngineMarkTwo(), new \stdClass()]],
-            validate: false,
+            fn(EngineInterface&MadeInUssrInterface ...$engines) => $engines,
+            [[new EngineZIL130(), new EngineVAZ2101(), new stdClass(), new EngineMarkTwo(), new stdClass()]],
+            validate: false
         );
 
         $this->assertCount(5, $result);

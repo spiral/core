@@ -11,6 +11,7 @@ use Spiral\Tests\Core\Stub\EngineMarkTwo;
 use Spiral\Tests\Core\Stub\EnumObject;
 use Spiral\Tests\Core\Stub\NewObjectInParam;
 use Spiral\Tests\Core\Stub\TestTrait;
+use stdClass;
 
 final class CommonCasesTest extends BaseTestCase
 {
@@ -50,7 +51,7 @@ final class CommonCasesTest extends BaseTestCase
         );
 
         $this->assertCount(1, $result);
-        $this->assertInstanceOf(\stdClass::class, $result[0]);
+        $this->assertInstanceOf(stdClass::class, $result[0]);
     }
 
     /**
@@ -62,17 +63,19 @@ final class CommonCasesTest extends BaseTestCase
         $this->expectExceptionMessage('Enum `Spiral\Tests\Core\Stub\EnumObject` can not be constructed.');
 
         $this->resolveClosure(
-            static function (EnumObject $enum): void {},
+            static function (EnumObject $enum) {},
         );
     }
 
     public function testNotInstantiableTrait(): void
     {
-        self::expectException(ContainerException::class);
-        self::expectExceptionMessage("Can't autowire `Spiral\Tests\Core\Stub\TestTrait`: class or injector not found.");
+        $this->expectException(ContainerException::class);
+        $this->expectExceptionMessage(
+            'Can\'t resolve `Spiral\Tests\Core\Stub\TestTrait`: undefined class or binding `Spiral\Tests\Core\Stub\TestTrait`.'
+        );
 
         $this->resolveClosure(
-            static function (TestTrait $enum): void {},
+            static function (TestTrait $enum) {},
         );
     }
 }

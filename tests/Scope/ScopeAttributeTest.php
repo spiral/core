@@ -7,6 +7,7 @@ namespace Spiral\Tests\Core\Scope;
 use PHPUnit\Framework\Attributes\Group;
 use Spiral\Core\Attribute\Scope;
 use Spiral\Core\Container;
+use Spiral\Core\Exception\Container\NotFoundException;
 use Spiral\Core\Exception\Scope\BadScopeException;
 use Spiral\Core\Exception\Scope\NamedScopeDuplicationException;
 use Spiral\Tests\Core\Scope\Stub\AttrScopeFoo;
@@ -28,7 +29,7 @@ final class ScopeAttributeTest extends BaseTestCase
     public function testBadScopeWithDisabledChecking(): void
     {
         $root = self::makeContainer(checkScope: false);
-        self::assertInstanceOf(AttrScopeFooSingleton::class, $root->make(AttrScopeFooSingleton::class));
+        $this->assertInstanceOf(AttrScopeFooSingleton::class, $root->make(AttrScopeFooSingleton::class));
     }
 
     /**
@@ -38,8 +39,8 @@ final class ScopeAttributeTest extends BaseTestCase
     {
         $root = self::makeContainer();
 
-        $root->runScoped(static function (Container $c1): void {
-            $c1->runScoped(static function (Container $c2) use ($c1): void {
+        $root->runScoped(static function (Container $c1) {
+            $c1->runScoped(static function (Container $c2) use ($c1) {
                 $obj1 = $c1->get(AttrScopeFooSingleton::class);
                 $obj2 = $c2->get(AttrScopeFooSingleton::class);
 
@@ -51,10 +52,10 @@ final class ScopeAttributeTest extends BaseTestCase
     public function testNamedScopeResolveFromParentScope(): void
     {
         $root = self::makeContainer();
-        $root->getBinder('bar')->bindSingleton('binding', static fn(): AttrScopeFoo => new AttrScopeFoo());
+        $root->getBinder('bar')->bindSingleton('binding', static fn () => new AttrScopeFoo());
 
-        $root->runScoped(static function (Container $fooScope): void {
-            $fooScope->runScoped(static function (Container $container): void {
+        $root->runScoped(static function (Container $fooScope) {
+            $fooScope->runScoped(static function (Container $container) {
                 self::assertInstanceOf(AttrScopeFoo::class, $container->get('binding'));
             }, name: 'bar');
         }, name: 'foo');
@@ -66,10 +67,10 @@ final class ScopeAttributeTest extends BaseTestCase
         self::expectExceptionMessage('`foo`');
 
         $root = self::makeContainer();
-        $root->getBinder('bar')->bindSingleton('binding', static fn(): AttrScopeFoo => new AttrScopeFoo());
+        $root->getBinder('bar')->bindSingleton('binding', static fn () => new AttrScopeFoo());
 
-        $root->runScoped(static function (Container $fooScope): void {
-            $fooScope->runScoped(static function (Container $container): void {
+        $root->runScoped(static function (Container $fooScope) {
+            $fooScope->runScoped(static function (Container $container) {
                 $container->get('binding');
             }, name: 'bar');
         }, name: 'baz');
@@ -78,31 +79,30 @@ final class ScopeAttributeTest extends BaseTestCase
     public function testAllParentNamedScopesNotContainsNeededScopeWithDisabledChecking(): void
     {
         $root = self::makeContainer(checkScope: false);
-        $root->getBinder('bar')->bindSingleton('binding', static fn(): AttrScopeFoo => new AttrScopeFoo());
+        $root->getBinder('bar')->bindSingleton('binding', static fn () => new AttrScopeFoo());
 
-        $root->runScoped(static function (Container $fooScope): void {
-            $fooScope->runScoped(static function (Container $container): void {
+        $root->runScoped(static function (Container $fooScope) {
+            $fooScope->runScoped(static function (Container $container) {
                 self::assertInstanceOf(AttrScopeFoo::class, $container->get('binding'));
             }, name: 'bar');
         }, name: 'baz');
     }
 
     /**
-     * The dependency has a constraint on the `foo` scope, but there is a binding in a bad `root` scope that has
-     * high priority.
-     * Requesting a dependency from a correct scope will be resolved from the `root` scope that leads to an exception.
+     * Request a dependency from a correct scope using alias but there is no any binding for this alias in the scope.
+     * The binding can be in the parent scope, but it doesn't matter.
      */
     #[Group('scrutinizer-ignore')]
     public function testRequestObjectFromValidScopeUsingFactoryFromWrongScope(): void
     {
-        self::expectException(BadScopeException::class);
+        self::expectException(NotFoundException::class);
         self::expectExceptionMessage('`foo`');
 
-        $root = self::makeContainer(checkScope: true);
+        $root = self::makeContainer();
         $root->bind('foo', self::makeFooScopeObject(...));
 
-        $root->runScoped(static function (Container $c1): void {
-            $c1->runScoped(static function (Container $c2): void {
+        $root->runScoped(static function (Container $c1) {
+            $c1->runScoped(static function (Container $c2) {
                 $c2->get('foo');
             }, name: 'foo');
         });
@@ -114,8 +114,8 @@ final class ScopeAttributeTest extends BaseTestCase
         $root = self::makeContainer(checkScope: false);
         $root->bind('foo', self::makeFooScopeObject(...));
 
-        $root->runScoped(static function (Container $c1): void {
-            $c1->runScoped(static function (Container $c2): void {
+        $root->runScoped(static function (Container $c1) {
+            $c1->runScoped(static function (Container $c2) {
                 self::assertInstanceOf(AttrScopeFoo::class, $c2->get('foo'));
             }, name: 'foo');
         });
@@ -133,8 +133,8 @@ final class ScopeAttributeTest extends BaseTestCase
         $root = self::makeContainer();
         $root->bind('foo', self::makeFooScopeObject(...));
 
-        $root->runScoped(static function (Container $c1): void {
-            $c1->runScoped(static function (Container $c2): void {
+        $root->runScoped(static function (Container $c1) {
+            $c1->runScoped(static function (Container $c2) {
                 $c2->get('foo');
             });
         });
@@ -146,8 +146,8 @@ final class ScopeAttributeTest extends BaseTestCase
         $root = self::makeContainer(checkScope: false);
         $root->bind('foo', self::makeFooScopeObject(...));
 
-        $root->runScoped(static function (Container $c1): void {
-            $c1->runScoped(static function (Container $c2): void {
+        $root->runScoped(static function (Container $c1) {
+            $c1->runScoped(static function (Container $c2) {
                 self::assertInstanceOf(AttrScopeFoo::class, $c2->get('foo'));
             });
         });
@@ -166,9 +166,9 @@ final class ScopeAttributeTest extends BaseTestCase
         $root = self::makeContainer();
 
         try {
-            $root->runScoped(static function (Container $c1): void {
-                $c1->runScoped(static function (Container $c2): void {
-                    $c2->runScoped(static function (Container $c3): void {
+            $root->runScoped(static function (Container $c1) {
+                $c1->runScoped(static function (Container $c2) {
+                    $c2->runScoped(static function (Container $c3) {
                         // do nothing
                     }, name: 'root');
                 });
@@ -186,17 +186,18 @@ final class ScopeAttributeTest extends BaseTestCase
     #[Group('scrutinizer-ignore')]
     public function testBadScopeException(): void
     {
+        self::expectException(BadScopeException::class);
+
         try {
             $root = self::makeContainer();
-            $root->runScoped(static function (Container $c1): void {
-                $c1->runScoped(static function (Container $c2): void {
+            $root->runScoped(static function (Container $c1) {
+                $c1->runScoped(static function (Container $c2) {
                     $c2->get(AttrScopeFoo::class);
                 });
             }, name: 'bar');
-
-            self::fail(BadScopeException::class . ' should be thrown');
         } catch (BadScopeException $e) {
             self::assertSame('foo', $e->getScope());
+            throw $e;
         }
     }
 

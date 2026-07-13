@@ -10,7 +10,8 @@ final class ScopedProxyStdClass
 {
     public function __construct(
         #[Proxy] public ContextInterface $context,
-    ) {}
+    ) {
+    }
 
     public function getContext(): ContextInterface
     {

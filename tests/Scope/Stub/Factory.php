@@ -10,7 +10,8 @@ class Factory
 {
     public function __construct(
         protected ContainerInterface $container,
-    ) {}
+    ) {
+    }
 
     public function make(string $key): mixed
     {
