@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\Core\Stub;
 
-final class EngineMarkTwo extends LightEngine
+class EngineMarkTwo extends LightEngine
 {
     public const NAME = 'Mark Two';
 
@@ -12,7 +12,7 @@ final class EngineMarkTwo extends LightEngine
 
     public function getName(): string
     {
-        return self::NAME;
+        return static::NAME;
     }
 
     public function getPower(): int

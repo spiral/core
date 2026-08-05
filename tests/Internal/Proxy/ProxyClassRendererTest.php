@@ -52,12 +52,7 @@ final class ProxyClassRendererTest extends TestCase
         yield [$from(static fn(object $link = new \stdClass()) => 0), 'mixed $link = new \stdClass()'];
         yield [
             $from(static fn(#[Proxy] float|int|\stdClass|null $string = new \stdClass(1, 2, bar: "\n'zero")) => 0),
-            // Reflection renders string literals differently since PHP 8.4.24 and 8.5.9;
-            // both variants are equivalent PHP expressions.
-            [
-                "mixed \$string = new \stdClass(1, 2, bar: '\n\'zero')",
-                "mixed \$string = new \stdClass(1, 2, bar: \"\\n'zero\")",
-            ],
+            "mixed \$string = new \stdClass(1, 2, bar: '\n\'zero')",
         ];
         yield [
             $from(static fn(SimpleEnum $val = SimpleEnum::B) => 0),
@@ -141,13 +136,11 @@ final class ProxyClassRendererTest extends TestCase
     /**
      * @dataProvider provideRenderParameter
      * @covers ::renderParameter
-     * @param string|list<string> $expected Expected result or a list of equivalent acceptable results
+     * @param mixed $expected
      */
-    public function testRenderParameter(\ReflectionParameter $param, string|array $expected): void
+    public function testRenderParameter(\ReflectionParameter $param, $expected): void
     {
-        \is_array($expected)
-            ? self::assertContains(ProxyClassRenderer::renderParameter($param), $expected)
-            : self::assertSame($expected, ProxyClassRenderer::renderParameter($param));
+        self::assertSame($expected, ProxyClassRenderer::renderParameter($param));
     }
 
     /**

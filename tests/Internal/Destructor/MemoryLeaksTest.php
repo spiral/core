@@ -7,7 +7,7 @@ namespace Spiral\Tests\Core\Internal\Destructor;
 use PHPUnit\Framework\TestCase;
 use Spiral\Core\Container;
 
-final class MemoryLeaksTest extends TestCase
+class MemoryLeaksTest extends TestCase
 {
     public function testInternalServicesDontBlockContainer(): void
     {

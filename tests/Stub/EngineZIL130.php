@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\Core\Stub;
 
-final class EngineZIL130 implements EngineInterface, MadeInUssrInterface
+class EngineZIL130 implements EngineInterface, MadeInUssrInterface
 {
     public const NAME = 'ZIL 130';
 
@@ -12,7 +12,7 @@ final class EngineZIL130 implements EngineInterface, MadeInUssrInterface
 
     public function getName(): string
     {
-        return self::NAME;
+        return static::NAME;
     }
 
     public function getPower(): int

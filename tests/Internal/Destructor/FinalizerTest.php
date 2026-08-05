@@ -7,7 +7,7 @@ namespace Spiral\Tests\Core\Internal\Destructor;
 use PHPUnit\Framework\TestCase;
 use Spiral\Core\Container;
 
-final class FinalizerTest extends TestCase
+class FinalizerTest extends TestCase
 {
     public function testInternalServicesDontBlockContainer(): void
     {
