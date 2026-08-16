@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Spiral\Tests\Core\Stub;
 
-class EngineVAZ2101 extends LightEngine implements MadeInUssrInterface
+final class EngineVAZ2101 extends LightEngine implements MadeInUssrInterface
 {
     public const NAME = 'VAZ 2101';
 
@@ -12,7 +12,7 @@ class EngineVAZ2101 extends LightEngine implements MadeInUssrInterface
 
     public function getName(): string
     {
-        return static::NAME;
+        return self::NAME;
     }
 
     public function rust(float $index): self
